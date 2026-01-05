@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập vào Chuồng Ngựa</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .btn-google {
+            background-color: white;
+            color: #757575;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn-google:hover { background-color: #f7f7f7; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .google-icon { width: 24px; height: 24px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🐴 Welcome!</h1>
+    <p>Vui lòng xuất trình thẻ bài để vào chuồng.</p>
+    <br>
+    <a href="/oauth2/authorization/google" class="btn-google">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" class="google-icon">
+        Đăng nhập bằng Google
+    </a>
+</div>
+</body>
+</html>
