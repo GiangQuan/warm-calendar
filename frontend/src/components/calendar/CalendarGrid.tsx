@@ -11,7 +11,7 @@ import {
 } from 'date-fns';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CalendarEvent, eventColors } from '@/types/calendar';
+import { CalendarEvent } from '@/types/calendar';
 import { DraggableEvent } from './DraggableEvent';
 import { DroppableCell } from './DroppableCell';
 
@@ -24,7 +24,7 @@ interface CalendarGridProps {
   onEventClick?: (event: CalendarEvent) => void;
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 export function CalendarGrid({
   currentDate,
@@ -48,7 +48,7 @@ export function CalendarGrid({
   return (
     <div className="bg-card border border-border overflow-hidden shadow-sm animate-fade-in">
       <div className="grid grid-cols-7 bg-muted/30">
-        {WEEKDAYS.map((day, i) => (
+        {WEEKDAYS.map((day) => (
           <div
             key={day}
             className="py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border"
