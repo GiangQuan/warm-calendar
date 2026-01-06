@@ -25,6 +25,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
       }
+    } else {
+      // MOCK USER - Bỏ qua đăng nhập để test Events API
+      // TODO: Xóa mock user này khi Auth API của Trang xong
+      setUser({
+        id: 1,
+        email: 'test@example.com',
+        displayName: 'Test User',
+        authProvider: 'local'
+      });
     }
     setLoading(false);
   }, []);

@@ -18,6 +18,7 @@ export function DroppableCell({ id, children, className, onClick }: DroppableCel
       ref={setNodeRef}
       onClick={onClick}
       className={cn(
+        'overflow-hidden min-w-0',
         className,
         isOver && 'bg-primary/10 ring-2 ring-inset ring-primary/30'
       )}

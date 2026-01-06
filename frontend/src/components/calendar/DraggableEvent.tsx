@@ -28,8 +28,8 @@ export function DraggableEvent({ event, showTime, compact, onClick }: DraggableE
       {...attributes}
       onClick={onClick}
       className={cn(
-        'text-xs text-primary-foreground mb-0.5 cursor-grab active:cursor-grabbing transition-all',
-        compact ? 'px-0.5 py-0 text-[10px] sm:text-xs sm:px-1 sm:py-0.5 truncate whitespace-nowrap overflow-hidden' : 'px-1 py-0.5 break-words overflow-hidden',
+        'text-xs text-primary-foreground mb-0.5 cursor-grab active:cursor-grabbing transition-all truncate whitespace-nowrap overflow-hidden min-w-0',
+        compact ? 'px-0.5 py-0 text-[10px] sm:text-xs sm:px-1 sm:py-0.5' : 'px-1 py-0.5',
         eventColors[event.color],
         isDragging && 'opacity-50 shadow-lg z-50'
       )}

@@ -37,17 +37,17 @@ export function CalendarHeader({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="flex items-center bg-card border border-border p-0.5 sm:p-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onPrevious}
               className="h-7 w-7 sm:h-8 sm:w-8 transition-all hover:bg-accent"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onNext}
               className="h-7 w-7 sm:h-8 sm:w-8 transition-all hover:bg-accent"
             >
@@ -59,9 +59,9 @@ export function CalendarHeader({
           </h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onToday}
             className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm transition-all hover:shadow-sm"
           >

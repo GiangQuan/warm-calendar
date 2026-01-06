@@ -18,8 +18,8 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
         onClick={() => onViewChange('month')}
         className={cn(
           'gap-2 h-8 px-3 transition-all duration-200',
-          view === 'month' 
-            ? 'bg-card shadow-sm text-foreground' 
+          view === 'month'
+            ? 'bg-card shadow-sm text-foreground'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
@@ -32,8 +32,8 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
         onClick={() => onViewChange('week')}
         className={cn(
           'gap-2 h-8 px-3 transition-all duration-200',
-          view === 'week' 
-            ? 'bg-card shadow-sm text-foreground' 
+          view === 'week'
+            ? 'bg-card shadow-sm text-foreground'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
