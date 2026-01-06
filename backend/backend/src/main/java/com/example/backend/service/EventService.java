@@ -33,6 +33,7 @@ public class EventService {
                 .recurrence(event.getRecurrence())
                 .endDate(event.getEndDate())
                 .meetingLink(event.getMeetingLink())
+                .userId(event.getUser().getId())
                 .build();
     }
 
