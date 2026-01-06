@@ -11,7 +11,7 @@ import {
 } from 'date-fns';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CalendarEvent } from '@/types/calendar';
+import { CalendarEvent, eventColors } from '@/types/calendar';
 import { DraggableEvent } from './DraggableEvent';
 import { DroppableCell } from './DroppableCell';
 
@@ -24,7 +24,7 @@ interface CalendarGridProps {
   onEventClick?: (event: CalendarEvent) => void;
 }
 
-const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function CalendarGrid({
   currentDate,
@@ -47,8 +47,8 @@ export function CalendarGrid({
 
   return (
     <div className="bg-card border border-border overflow-hidden shadow-sm animate-fade-in">
-      <div className="grid grid-cols-7 bg-muted/30">
-        {WEEKDAYS.map((day) => (
+      <div className="grid grid-cols-7" style={{ backgroundColor: '#dae0e7' }}>
+        {WEEKDAYS.map((day, i) => (
           <div
             key={day}
             className="py-2 sm:py-3 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border"
@@ -71,14 +71,14 @@ export function CalendarGrid({
               id={`month-${day.toISOString()}`}
               onClick={() => onSelectDate(day)}
               className={cn(
-                'group relative min-h-[60px] sm:min-h-[100px] md:min-h-[110px] p-1 sm:p-2 text-left border-b border-r border-border transition-all duration-200 cursor-pointer',
+                'group relative min-h-[60px] sm:min-h-[100px] md:min-h-[110px] p-1 sm:p-2 text-left border-b border-r border-gray-200 transition-all duration-200 cursor-pointer',
                 index % 7 === 0 && 'border-l-0',
-                !isCurrentMonth && 'bg-muted/20 text-muted-foreground',
+                !isCurrentMonth && 'bg-[#F7F8F9] text-muted-foreground',
                 isCurrentMonth && 'hover:bg-accent/40',
                 isSelected && 'bg-accent ring-1 ring-inset ring-primary/20'
               )}
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start   justify-between">
                 <span
                   className={cn(
                     'inline-flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center text-xs sm:text-sm font-medium transition-all',

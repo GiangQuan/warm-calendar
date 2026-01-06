@@ -35,10 +35,17 @@ interface EditEventFormProps {
 }
 
 const colorOptions: { value: EventColor; label: string; className: string }[] = [
-  { value: 'primary', label: 'Blue', className: 'bg-primary' },
-  { value: 'secondary', label: 'Slate', className: 'bg-secondary' },
-  { value: 'accent', label: 'Gray', className: 'bg-muted' },
-  { value: 'destructive', label: 'Red', className: 'bg-destructive' },
+  { value: 'primary', label: 'Theme Primary', className: 'bg-primary' },
+  { value: 'red', label: 'Red', className: 'bg-red-500' },
+  { value: 'orange', label: 'Orange', className: 'bg-orange-500' },
+  { value: 'amber', label: 'Amber', className: 'bg-amber-500' },
+  { value: 'green', label: 'Green', className: 'bg-green-500' },
+  { value: 'teal', label: 'Teal', className: 'bg-teal-500' },
+  { value: 'blue', label: 'Blue', className: 'bg-blue-500' },
+  { value: 'indigo', label: 'Indigo', className: 'bg-indigo-500' },
+  { value: 'purple', label: 'Purple', className: 'bg-purple-500' },
+  { value: 'pink', label: 'Pink', className: 'bg-pink-500' },
+  { value: 'secondary', label: 'Theme Secondary', className: 'bg-secondary' },
 ];
 
 const recurrenceOptions: RecurrenceType[] = ['none', 'daily', 'weekly', 'monthly'];
@@ -160,7 +167,7 @@ export function EditEventForm({
           </div>
           <div className="space-y-2">
             <Label>Color</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {colorOptions.map((option) => (
                 <button
                   key={option.value}

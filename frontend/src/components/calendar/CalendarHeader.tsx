@@ -1,7 +1,20 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
 import { ViewToggle, CalendarView } from './ViewToggle';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState } from 'react';
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -10,7 +23,16 @@ interface CalendarHeaderProps {
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
+  onDateChange?: (date: Date) => void;
 }
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
 export function CalendarHeader({
   currentDate,
@@ -19,7 +41,10 @@ export function CalendarHeader({
   onPrevious,
   onNext,
   onToday,
+  onDateChange,
 }: CalendarHeaderProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const getTitle = () => {
     if (view === 'month') {
       return format(currentDate, 'MMMM yyyy');
@@ -32,43 +57,103 @@ export function CalendarHeader({
     return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
   };
 
+  const handleMonthChange = (month: string) => {
+    if (onDateChange) {
+      const newDate = setMonth(currentDate, parseInt(month));
+      onDateChange(newDate);
+    }
+  };
+
+  const handleYearChange = (year: string) => {
+    if (onDateChange) {
+      const newDate = setYear(currentDate, parseInt(year));
+      onDateChange(newDate);
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-3 mb-4 sm:mb-8 animate-fade-in">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <div className="flex items-center bg-card border border-border p-0.5 sm:p-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onPrevious}
-              className="h-7 w-7 sm:h-8 sm:w-8 transition-all hover:bg-accent"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onNext}
-              className="h-7 w-7 sm:h-8 sm:w-8 transition-all hover:bg-accent"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold tracking-tight font-serif truncate">
-            {getTitle()}
-          </h1>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-2">
+    <div className="flex items-center gap-3 sm:gap-4 animate-fade-in">
+      <div className="flex items-center bg-muted/30 rounded-lg p-1 gap-0.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onPrevious}
+          className="h-8 w-8 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
+        >
+          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onNext}
+          className="h-8 w-8 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
+        >
+          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+      </div>
+
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={onToday}
-            className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm transition-all hover:shadow-sm"
+            variant="ghost"
+            className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight font-serif text-foreground hover:bg-accent/50 px-2 py-1 h-auto gap-1 transition-all duration-200"
           >
-            Today
+            {getTitle()}
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </Button>
-          <ViewToggle view={view} onViewChange={onViewChange} />
-        </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-4 bg-popover border border-border shadow-lg z-50" align="start">
+          <div className="flex gap-3">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Month</label>
+              <Select
+                value={currentDate.getMonth().toString()}
+                onValueChange={handleMonthChange}
+              >
+                <SelectTrigger className="w-[130px] bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border z-50">
+                  {MONTHS.map((month, index) => (
+                    <SelectItem key={month} value={index.toString()}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Year</label>
+              <Select
+                value={currentDate.getFullYear().toString()}
+                onValueChange={handleYearChange}
+              >
+                <SelectTrigger className="w-[100px] bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border z-50 max-h-[200px]">
+                  {YEARS.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToday}
+          className="h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-border/60 bg-card hover:bg-accent hover:border-accent transition-all duration-200 hover:shadow-md active:scale-95"
+        >
+          Today
+        </Button>
+        <ViewToggle view={view} onViewChange={onViewChange} />
       </div>
     </div>
   );

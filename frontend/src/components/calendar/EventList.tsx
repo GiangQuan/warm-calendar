@@ -22,7 +22,7 @@ interface EventListProps {
 export function EventList({ date, events, onRemoveEvent, onEditEvent, className }: EventListProps) {
   return (
     <div className={cn("bg-card border border-border shadow-sm animate-slide-up flex flex-col overflow-hidden", className)}>
-      <div className="p-5 border-b border-border bg-muted/30">
+      <div className="p-5 border-b border-border bg-[#dae0e7]">
         <h2 className="text-lg font-semibold font-serif">
           {format(date, 'EEEE')}
         </h2>
