@@ -63,14 +63,14 @@ erDiagram
 
 ## API Endpoints
 
-### Auth (Người 1)
+### Auth (Thu Trang)
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
 | POST | `/api/auth/register` | Đăng ký tài khoản |
 | POST | `/api/auth/login` | Đăng nhập |
 | POST | `/api/auth/google` | Đăng nhập Google |
 
-### Events (Người 2)
+### Events (Tien Son)
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
 | GET | `/api/events?userId={id}` | Lấy events của user |
@@ -85,8 +85,8 @@ erDiagram
 | Người | Vai trò | Branch | Nhiệm vụ chính |
 |-------|---------|--------|----------------|
 | **GiangQuan** | Frontend + PM | `main` | React, setup, review |
-| **Người 1** | Backend Auth | `backend-auth` | User, Login, Google |
-| **Người 2** | Backend Event | `backend-events` | CRUD Events |
+| **Thu Trang** | Backend Auth | `backend-auth` | User, Login, Google |
+| **Tien Son** | Backend Event | `backend-events` | CRUD Events |
 
 ---
 

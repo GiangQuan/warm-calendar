@@ -3,8 +3,8 @@
 ## Team Members
 | Vai trò | Người | Branch | Trách nhiệm |
 |---------|-------|--------|-------------|
-| Backend Auth | Người 1 | `backend-auth` | User, Login, Google OAuth |
-| Backend Event | Người 2 | `backend-events` | Events CRUD API |
+| Backend Auth | Thu Trang | `backend-auth` | User, Login, Google OAuth |
+| Backend Event | Tien Son | `backend-events` | Events CRUD API |
 | Frontend + PM | **Bạn** | `main` | React, API integration, quản lý team |
 
 ---
@@ -19,9 +19,9 @@ gantt
     Setup & Database       :a1, 2026-01-05, 1d
     Frontend Development   :a2, 2026-01-06, 3d
     Integration            :a3, 2026-01-09, 1d
-    section Người 1
+    section Thu Trang
     Auth API               :b1, 2026-01-06, 3d
-    section Người 2
+    section Tien Son
     Event API              :c1, 2026-01-06, 3d
 ```
 
@@ -38,12 +38,12 @@ flowchart TB
     end
     
     subgraph Backend["Backend (Spring Boot)"]
-        subgraph AuthModule["Người 1"]
+        subgraph AuthModule["Thu Trang"]
             AC[AuthController]
             AS[AuthService]
             UR[UserRepository]
         end
-        subgraph EventModule["Người 2"]
+        subgraph EventModule["Tien Son"]
             EC[EventController]
             ES[EventService]
             ER[EventRepository]
@@ -67,8 +67,8 @@ flowchart TB
 | File | Cho ai |
 |------|--------|
 | [LEADER_TASKS.md](./LEADER_TASKS.md) | Bạn (Frontend + PM) |
-| [FRIEND1_BACKEND_TASKS.md](./FRIEND1_BACKEND_TASKS.md) | Người 1 (Auth) |
-| [FRIEND2_BACKEND_TASKS.md](./FRIEND2_BACKEND_TASKS.md) | Người 2 (Events) |
+| [FRIEND1_BACKEND_TASKS.md](./FRIEND1_BACKEND_TASKS.md) | Thu Trang (Auth) |
+| [FRIEND2_BACKEND_TASKS.md](./FRIEND2_BACKEND_TASKS.md) | Tien Son (Events) |
 
 ---
 
@@ -129,7 +129,7 @@ flowchart LR
 ## Git Branches
 ```
 main (protected)
-├── backend-auth (Người 1)
-├── backend-events (Người 2)
+├── backend-auth (Thu Trang)
+├── backend-events (Tien Son)
 ```
 

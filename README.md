@@ -267,14 +267,14 @@ npm run dev
       <code>main</code>
     </td>
     <td align="center">
-      <strong>Teammate 1</strong>
+      <strong>Thu Trang</strong>
       <br>
       <sub>🔐 Backend Auth</sub>
       <br>
       <code>backend-auth</code>
     </td>
     <td align="center">
-      <strong>Teammate 2</strong>
+      <strong>Tien Son</strong>
       <br>
       <sub>📅 Backend Events</sub>
       <br>

@@ -64,9 +64,9 @@ Chạy SQL này trong **DataGrip**:
 ```
 
 ### Step 4: Gửi task cho team
-- [ ] Gửi `FRIEND1_BACKEND_TASKS.md` cho Người 1 (Auth)
-- [ ] Gửi `FRIEND2_BACKEND_TASKS.md` cho Người 2 (Events)
-- [ ] Gửi **Google Client ID** cho Người 1
+- [ ] Gửi `FRIEND1_BACKEND_TASKS.md` cho Thu Trang (Auth)
+- [ ] Gửi `FRIEND2_BACKEND_TASKS.md` cho Tien Son (Events)
+- [ ] Gửi **Google Client ID** cho Thu Trang
 
 ---
 

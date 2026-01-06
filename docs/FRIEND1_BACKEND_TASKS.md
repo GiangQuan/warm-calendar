@@ -1,4 +1,4 @@
-# Người 1: Backend Developer (Auth Focus)
+# Thu Trang: Backend Developer (Auth Focus)
 
 ## Nhiệm vụ
 Xây dựng **Authentication API** - quản lý đăng ký, đăng nhập, và Google Login.

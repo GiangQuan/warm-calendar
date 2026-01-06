@@ -1,4 +1,4 @@
-# Người 2: Backend Developer (Event Focus)
+# Tien Son: Backend Developer (Event Focus)
 
 ## Nhiệm vụ
 Xây dựng **Event API** - quản lý CRUD cho calendar events.

@@ -11,10 +11,10 @@
 git clone https://github.com/[username]/warm-calendar.git
 cd warm-calendar
 
-# Người 1 (Auth):
+# Thu Trang (Auth):
 git checkout backend-auth
 
-# Người 2 (Events):
+# Tien Son (Events):
 git checkout backend-events
 ```
 
