@@ -21,10 +21,12 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()  // Allow ALL requests for testing
+                .requestMatchers("/", "/api/**", "/login/**", "/oauth2/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .defaultSuccessUrl("/api/auth/success", true)
             );
         
         return http.build();
