@@ -9,7 +9,7 @@ import {
 } from 'date-fns';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CalendarEvent, eventColors } from '@/types/calendar';
+import { CalendarEvent } from '@/types/calendar';
 import { DraggableEvent } from './DraggableEvent';
 import { DroppableCell } from './DroppableCell';
 
@@ -44,7 +44,7 @@ export function WeekGrid({
         if (event.recurrence === 'none') return false;
         if (day < eventDate) return false;
         if (event.endDate && day > new Date(event.endDate)) return false;
-        
+
         const matchesDay = (() => {
           switch (event.recurrence) {
             case 'daily': return true;
@@ -53,10 +53,10 @@ export function WeekGrid({
             default: return false;
           }
         })();
-        
+
         if (!matchesDay) return false;
       }
-      
+
       if (!event.time) return hour === 9; // Default to 9 AM for events without time
       const eventHour = parseInt(event.time.split(':')[0], 10);
       return eventHour === hour;
@@ -70,7 +70,7 @@ export function WeekGrid({
         if (event.recurrence === 'none') return false;
         if (day < eventDate) return false;
         if (event.endDate && day > new Date(event.endDate)) return false;
-        
+
         switch (event.recurrence) {
           case 'daily': return true;
           case 'weekly': return eventDate.getDay() === day.getDay();
@@ -78,7 +78,7 @@ export function WeekGrid({
           default: return false;
         }
       })();
-      
+
       return eventMatches && !event.time;
     });
   };
@@ -152,7 +152,7 @@ export function WeekGrid({
       </div>
 
       {/* Time slots */}
-      <div className="overflow-y-auto max-h-[400px] sm:max-h-[600px]">
+      <div className="overflow-y-auto max-h-[400px] sm:max-h-[600px] lg:max-h-[calc(100vh-200px)]">
         {HOURS.map((hour) => (
           <div
             key={hour}
@@ -169,7 +169,7 @@ export function WeekGrid({
                   id={`${day.toISOString()}-${hour}`}
                   onClick={() => onSelectDate(day)}
                   className={cn(
-                    'group relative min-h-[36px] sm:min-h-[48px] p-0.5 border-r border-border last:border-r-0 cursor-pointer hover:bg-accent/50',
+                    'group relative min-h-[40px] sm:min-h-[52px] lg:min-h-[56px] p-0.5 border-r border-border last:border-r-0 cursor-pointer hover:bg-accent/50',
                     isSameDay(day, selectedDate) && 'bg-accent/30'
                   )}
                 >
@@ -187,7 +187,6 @@ export function WeekGrid({
                     <DraggableEvent
                       key={event.id}
                       event={event}
-                      showTime
                       compact
                       onClick={(e) => {
                         e.stopPropagation();

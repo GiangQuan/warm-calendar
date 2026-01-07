@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addMonths, subMonths, addWeeks, subWeeks, parseISO } from 'date-fns';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { LogOut, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { WeekGrid } from '@/components/calendar/WeekGrid';
@@ -13,11 +13,12 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent, eventColors } from '@/types/calendar';
 import { CalendarView } from '@/components/calendar/ViewToggle';
 import { Button } from '@/components/ui/button';
+import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const Calendar = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -117,8 +118,8 @@ const Calendar = () => {
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="min-h-screen bg-background">
-        <div className="container py-4 sm:py-6 md:py-8 max-w-7xl mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between mb-2 sm:mb-4">
+        <div className="py-2 sm:py-3 px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between mb-2">
             <CalendarHeader
               currentDate={currentDate}
               view={view}
@@ -127,14 +128,11 @@ const Calendar = () => {
               onNext={handleNext}
               onToday={handleToday}
             />
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 sm:gap-2 h-7 sm:h-8 px-2 sm:px-3">
-              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
+            <UserProfileDropdown />
           </div>
 
-          {/* Mobile: Calendar only, events in sheet */}
-          <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6">
+          {/* Calendar layout */}
+          <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 xl:gap-6">
             {view === 'month' ? (
               <CalendarGrid
                 currentDate={currentDate}
@@ -156,7 +154,7 @@ const Calendar = () => {
             )}
 
             {/* Desktop sidebar */}
-            <div className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[600px]">
+            <div className="hidden lg:flex flex-col gap-3 lg:sticky lg:top-2 lg:max-h-[calc(100vh-80px)]">
               <AddEventForm
                 selectedDate={selectedDate}
                 onAddEvent={addEvent}

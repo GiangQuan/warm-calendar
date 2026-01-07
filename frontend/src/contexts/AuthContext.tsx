@@ -8,6 +8,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  updateProfile: (data: { displayName?: string; avatarUrl?: string }) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,8 +76,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (data: { displayName?: string; avatarUrl?: string }) => {
+    try {
+      if (!user) {
+        return { error: new Error('No user logged in') };
+      }
+      // Update user locally (will be synced to localStorage via useEffect)
+      // TODO: Call API to update profile on backend when ready
+      setUser(prev => prev ? { ...prev, ...data } : null);
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
