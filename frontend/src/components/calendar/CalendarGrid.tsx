@@ -42,7 +42,39 @@ export function CalendarGrid({
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   const getEventsForDay = (day: Date) => {
-    return events.filter((event) => isSameDay(event.date, day));
+    return events.filter((event) => {
+      const eventDate = new Date(event.date);
+      const checkDate = new Date(day);
+      
+      // Reset time to start of day for comparison
+      eventDate.setHours(0, 0, 0, 0);
+      checkDate.setHours(0, 0, 0, 0);
+      
+      // Exact match
+      if (isSameDay(eventDate, checkDate)) return true;
+      
+      // Only check recurrence if the date is after the event start date
+      if (checkDate < eventDate) return false;
+      
+      // Check end date if it exists
+      if (event.endDate) {
+        const endDate = new Date(event.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        if (checkDate > endDate) return false;
+      }
+      
+      // Handle recurrence
+      switch (event.recurrence) {
+        case 'daily':
+          return true;
+        case 'weekly':
+          return eventDate.getDay() === checkDate.getDay();
+        case 'monthly':
+          return eventDate.getDate() === checkDate.getDate();
+        default:
+          return false;
+      }
+    });
   };
 
   return (

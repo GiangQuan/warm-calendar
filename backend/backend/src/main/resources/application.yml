@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: warm-calendar
+
+  # MySQL Configuration (đọc từ biến môi trường)
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 60000
+      connection-timeout: 30000
+
+  # JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Google OAuth 2.0 (đọc từ biến môi trường)
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: email,profile,openid
+
+# Server
+server:
+  port: 8080
+
+# JWT Configuration (đọc từ biến môi trường)
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000

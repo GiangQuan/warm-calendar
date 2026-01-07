@@ -9,6 +9,7 @@ import { WeekGrid } from '@/components/calendar/WeekGrid';
 import { EventList } from '@/components/calendar/EventList';
 import { AddEventForm } from '@/components/calendar/AddEventForm';
 import { EditEventForm } from '@/components/calendar/EditEventForm';
+import { RecurringEventDialog } from '@/components/calendar/RecurringEventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent, eventColors } from '@/types/calendar';
 import { CalendarView } from '@/components/calendar/ViewToggle';
@@ -28,6 +29,10 @@ const Calendar = () => {
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [view, setView] = useState<CalendarView>('month');
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
+  const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
+  const [pendingDragEvent, setPendingDragEvent] = useState<CalendarEvent | null>(null);
+  const [pendingDragDate, setPendingDragDate] = useState<Date | null>(null);
+  const [pendingDragTime, setPendingDragTime] = useState<string | undefined>(undefined);
   const { events, addEvent, updateEvent, removeEvent, getEventsForDate } = useCalendarEvents();
 
   useEffect(() => {
@@ -72,6 +77,23 @@ const Calendar = () => {
     setActiveEvent(draggedEvent || null);
   };
 
+  // Helper to parse drop target and get date/time
+  const parseDropTarget = (dropId: string): { newDate: Date; newTime?: string } | null => {
+    if (dropId.startsWith('month-')) {
+      const dateStr = dropId.replace('month-', '');
+      return { newDate: parseISO(dateStr) };
+    } else if (dropId.startsWith('allday-')) {
+      const dateStr = dropId.replace('allday-', '');
+      return { newDate: parseISO(dateStr), newTime: undefined };
+    } else {
+      const lastDashIndex = dropId.lastIndexOf('-');
+      const dateStr = dropId.substring(0, lastDashIndex);
+      const hour = parseInt(dropId.substring(lastDashIndex + 1), 10);
+      const newTime = `${hour.toString().padStart(2, '0')}:00`;
+      return { newDate: parseISO(dateStr), newTime };
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveEvent(null);
@@ -82,27 +104,55 @@ const Calendar = () => {
     if (!draggedEvent) return;
 
     const dropId = over.id as string;
+    const parsed = parseDropTarget(dropId);
+    if (!parsed) return;
 
-    // Parse the drop target
-    if (dropId.startsWith('month-')) {
-      // Month view drop - just update the date
-      const dateStr = dropId.replace('month-', '');
-      const newDate = parseISO(dateStr);
-      updateEvent(draggedEvent.id, { date: newDate });
-    } else if (dropId.startsWith('allday-')) {
-      // All-day slot in week view
-      const dateStr = dropId.replace('allday-', '');
-      const newDate = parseISO(dateStr);
-      updateEvent(draggedEvent.id, { date: newDate, time: undefined });
+    // Check if this is a recurring event
+    if (draggedEvent.recurrence !== 'none') {
+      // Store pending drag data and show dialog
+      setPendingDragEvent(draggedEvent);
+      setPendingDragDate(parsed.newDate);
+      setPendingDragTime(parsed.newTime);
+      setRecurringDialogOpen(true);
     } else {
-      // Hour slot in week view (format: dateISO-hour)
-      const lastDashIndex = dropId.lastIndexOf('-');
-      const dateStr = dropId.substring(0, lastDashIndex);
-      const hour = parseInt(dropId.substring(lastDashIndex + 1), 10);
-      const newDate = parseISO(dateStr);
-      const newTime = `${hour.toString().padStart(2, '0')}:00`;
-      updateEvent(draggedEvent.id, { date: newDate, time: newTime });
+      // Non-recurring: just move it
+      updateEvent(draggedEvent.id, { 
+        date: parsed.newDate, 
+        ...(parsed.newTime !== undefined && { time: parsed.newTime })
+      });
     }
+  };
+
+  const handleMoveAllRecurring = () => {
+    if (pendingDragEvent && pendingDragDate) {
+      updateEvent(pendingDragEvent.id, {
+        date: pendingDragDate,
+        ...(pendingDragTime !== undefined && { time: pendingDragTime })
+      });
+    }
+    closeRecurringDialog();
+  };
+
+  const handleMoveOneRecurring = () => {
+    if (pendingDragEvent && pendingDragDate) {
+      // Create a new non-recurring event for this instance
+      addEvent({
+        title: pendingDragEvent.title,
+        date: pendingDragDate,
+        time: pendingDragTime ?? pendingDragEvent.time,
+        color: pendingDragEvent.color,
+        recurrence: 'none',
+        meetingLink: pendingDragEvent.meetingLink,
+      });
+    }
+    closeRecurringDialog();
+  };
+
+  const closeRecurringDialog = () => {
+    setRecurringDialogOpen(false);
+    setPendingDragEvent(null);
+    setPendingDragDate(null);
+    setPendingDragTime(undefined);
   };
 
   const selectedDateEvents = getEventsForDate(selectedDate);
@@ -130,6 +180,7 @@ const Calendar = () => {
             />
             <UserProfileDropdown />
           </div>
+
 
           {/* Calendar layout */}
           <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 xl:gap-6">
@@ -222,6 +273,15 @@ const Calendar = () => {
           </div>
         )}
       </DragOverlay>
+      
+      <RecurringEventDialog
+        open={recurringDialogOpen}
+        event={pendingDragEvent}
+        targetDate={pendingDragDate}
+        onClose={closeRecurringDialog}
+        onMoveAll={handleMoveAllRecurring}
+        onMoveOne={handleMoveOneRecurring}
+      />
     </DndContext>
   );
 };
