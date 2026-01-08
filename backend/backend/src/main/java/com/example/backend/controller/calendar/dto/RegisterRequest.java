@@ -1,4 +1,4 @@
-package com.calendar.dto;
+package com.example.backend.controller.calendar.dto;
 
 import org.jspecify.annotations.Nullable;
 

@@ -1,4 +1,4 @@
-package com.calendar.model;
+package com.example.backend.controller.calendar.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User { // KHÔNG ĐƯỢC CÓ CHỮ 'FINAL' Ở ĐÂY
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,10 +30,11 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
+    @Builder.Default
     @Column(name = "auth_provider")
     private String authProvider = "local";
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
@@ -47,12 +49,5 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    public void setFullName(Object fullName) {
-    }
-
-    public String getFullName() {
-        return "";
     }
 }

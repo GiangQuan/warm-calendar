@@ -1,8 +1,10 @@
-package com.calendar.service;
+package com.example.backend.controller.calendar.service;
 
 import com.calendar.dto.*;
-import com.calendar.model.User;
-import com.calendar.repository.UserRepository;
+import com.example.backend.controller.calendar.dto.AuthResponse;
+import com.example.backend.controller.calendar.dto.LoginRequest;
+import com.example.backend.controller.calendar.model.User;
+import com.example.backend.controller.calendar.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

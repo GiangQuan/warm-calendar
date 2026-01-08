@@ -1,4 +1,4 @@
-package com.calendar.service;
+package com.example.backend.controller.calendar.service;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
