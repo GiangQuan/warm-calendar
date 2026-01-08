@@ -1,6 +1,6 @@
 package com.example.backend.controller.calendar.repository;
 
-import com.example.backend.controller.calendar.model.User;
+import com.example.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

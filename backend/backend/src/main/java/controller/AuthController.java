@@ -1,9 +1,8 @@
-package com.example.backend.controller.calendar.controller;
+package controller;
 
-import com.calendar.dto.*;
-import com.example.backend.controller.calendar.dto.AuthResponse;
-import com.example.backend.controller.calendar.dto.LoginRequest;
-import com.example.backend.controller.calendar.service.AuthService;
+import com.example.backend.dto.AuthResponse;
+import com.example.backend.dto.LoginRequest;
+import com.example.backend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
