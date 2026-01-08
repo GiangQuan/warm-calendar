@@ -1,110 +1,113 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CalendarEvent } from '@/types/calendar';
+import { api } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   isSameDay,
   getDate,
   getDay,
-  addWeeks,
   startOfDay,
+  format,
 } from 'date-fns';
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
-
 export function useCalendarEvents() {
-  const today = new Date();
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    {
-      id: generateId(),
-      title: 'Team Meeting',
-      date: today,
-      time: '10:00',
-      color: 'primary',
-      recurrence: 'weekly',
-      endDate: addWeeks(today, 4),
-      meetingLink: 'https://zoom.us/j/123456789',
-    },
-    {
-      id: generateId(),
-      title: 'Lunch with Sarah',
-      date: today,
-      time: '12:30',
-      color: 'secondary',
-      recurrence: 'none',
-    },
-    {
-      id: generateId(),
-      title: 'Project Review',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-      time: '14:00',
-      color: 'accent',
-      recurrence: 'none',
-      meetingLink: 'https://meet.google.com/abc-defg-hij',
-    },
-    {
-      id: generateId(),
-      title: 'Client Call',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
-      time: '09:30',
-      color: 'destructive',
-      recurrence: 'none',
-      meetingLink: 'https://teams.microsoft.com/meet/123',
-    },
-    {
-      id: generateId(),
-      title: 'Gym Session',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-      time: '07:00',
-      color: 'primary',
-      recurrence: 'daily',
-      endDate: addWeeks(today, 2),
-    },
-    {
-      id: generateId(),
-      title: 'Birthday Party',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5),
-      time: '18:00',
-      color: 'secondary',
-      recurrence: 'none',
-    },
-    {
-      id: generateId(),
-      title: 'Doctor Appointment',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3),
-      time: '11:00',
-      color: 'destructive',
-      recurrence: 'none',
-    },
-    {
-      id: generateId(),
-      title: 'Weekly Standup',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
-      time: '09:00',
-      color: 'accent',
-      recurrence: 'weekly',
-      meetingLink: 'https://zoom.us/j/987654321',
-    },
-  ]);
+  const { user } = useAuth();
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+  // 1. Fetch events from API on mount/user change
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (user?.id) {
+        try {
+          const data = await api.getEvents(user.id);
+          // Backend trả về mảng EventDto[], cần đảm bảo format date là Date object và ID là string
+          const formattedEvents: CalendarEvent[] = data.map((e: any) => ({
+            ...e,
+            id: String(e.id),
+            date: new Date(e.date),
+            endDate: e.endDate ? new Date(e.endDate) : undefined,
+            color: e.color as any,
+            recurrence: e.recurrence as any,
+          }));
+          setEvents(formattedEvents);
+        } catch (error) {
+          console.error("Failed to fetch events:", error);
+        }
+      }
+    };
+    fetchEvents();
+  }, [user]);
 
   const addEvent = useCallback(
-    (event: Omit<CalendarEvent, 'id'>) => {
-      setEvents((prev) => [...prev, { ...event, id: generateId() }]);
+    async (eventData: Omit<CalendarEvent, 'id'>) => {
+      if (!user?.id) return;
+      try {
+        // Prepare data for backend (convert Date to YYYY-MM-DD string)
+        const payload = {
+          ...eventData,
+          userId: user.id,
+          date: format(eventData.date, 'yyyy-MM-dd'),
+          endDate: eventData.endDate ? format(eventData.endDate, 'yyyy-MM-dd') : undefined,
+        };
+        const savedEvent = await api.createEvent(payload);
+        
+        // Update local state with the event returned from backend (stringify ID)
+        const formattedSavedEvent: CalendarEvent = {
+          ...savedEvent,
+          id: String(savedEvent.id),
+          date: new Date(savedEvent.date),
+          endDate: savedEvent.endDate ? new Date(savedEvent.endDate) : undefined,
+          color: savedEvent.color as any,
+          recurrence: savedEvent.recurrence as any,
+        } as CalendarEvent;
+        
+        setEvents((prev) => [...prev, formattedSavedEvent]);
+      } catch (error) {
+        console.error("Failed to add event:", error);
+      }
     },
-    []
+    [user]
   );
 
   const updateEvent = useCallback(
-    (id: string, updates: Partial<Omit<CalendarEvent, 'id'>>) => {
-      setEvents((prev) =>
-        prev.map((event) =>
-          event.id === id ? { ...event, ...updates } : event
-        )
-      );
+    async (id: string, updates: Partial<Omit<CalendarEvent, 'id'>>) => {
+      try {
+        const payload = {
+          ...updates,
+          userId: user?.id,
+          date: updates.date ? format(updates.date, 'yyyy-MM-dd') : undefined,
+          endDate: updates.endDate ? format(updates.endDate, 'yyyy-MM-dd') : undefined,
+        };
+        const updatedEvent = await api.updateEvent(Number(id), payload);
+        
+        const formattedUpdatedEvent: CalendarEvent = {
+          ...updatedEvent,
+          id: String(updatedEvent.id),
+          date: new Date(updatedEvent.date),
+          endDate: updatedEvent.endDate ? new Date(updatedEvent.endDate) : undefined,
+          color: updatedEvent.color as any,
+          recurrence: updatedEvent.recurrence as any,
+        } as CalendarEvent;
+
+        setEvents((prev) =>
+          prev.map((event) =>
+            event.id === id ? formattedUpdatedEvent : event
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update event:", error);
+      }
     },
-    []
+    [user]
   );
 
-  const removeEvent = useCallback((id: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== id));
+  const removeEvent = useCallback(async (id: string) => {
+    try {
+      await api.deleteEvent(Number(id));
+      setEvents((prev) => prev.filter((event) => event.id !== id));
+    } catch (error) {
+      console.error("Failed to remove event:", error);
+    }
   }, []);
 
   const isEventOnDate = (event: CalendarEvent, date: Date): boolean => {
@@ -141,3 +144,4 @@ export function useCalendarEvents() {
 
   return { events, addEvent, updateEvent, removeEvent, getEventsForDate };
 }
+

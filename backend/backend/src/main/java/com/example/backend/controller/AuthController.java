@@ -10,7 +10,9 @@ import com.example.backend.dto.RegisterRequest;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,9 +27,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @GetMapping("/success")
-    public Map<String, Object> loginSuccess(@AuthenticationPrincipal OAuth2User principal) {
-        Map<String, Object> response = new HashMap<>();
-        
+    public ResponseEntity<Void> loginSuccess(@AuthenticationPrincipal OAuth2User principal) {
         if (principal != null) {
             String email = principal.getAttribute("email");
             String googleId = principal.getAttribute("sub");
@@ -35,7 +35,7 @@ public class AuthController {
             String picture = principal.getAttribute("picture");
 
             // Tìm hoặc tạo user mới
-            User user = userRepository.findByGoogleId(googleId)
+            userRepository.findByGoogleId(googleId)
                 .orElseGet(() -> {
                     User newUser = User.builder()
                         .email(email)
@@ -47,18 +47,36 @@ public class AuthController {
                     return userRepository.save(newUser);
                 });
 
-            response.put("success", true);
-            response.put("message", "Google OAuth Login Successful!");
-            response.put("id", user.getId());
-            response.put("email", user.getEmail());
-            response.put("name", user.getDisplayName());
-            response.put("picture", user.getAvatarUrl());
-        } else {
-            response.put("success", false);
-            response.put("message", "Not authenticated");
+            // Chuyển hướng người dùng về lại Frontend trang callback
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create("http://localhost:5173/auth/callback"))
+                    .build();
         }
         
-        return response;
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:5173/auth?error=google_failed"))
+                .build();
+    }
+
+    @GetMapping("/me")
+    public AuthResponse getCurrentUser(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal == null) return AuthResponse.builder().message("Not logged in").build();
+        
+        String googleId = principal.getAttribute("sub");
+        User user = userRepository.findByGoogleId(googleId).orElse(null);
+        
+        if (user == null) {
+            // Trường hợp user login local (nếu dùng session) hoặc không tìm thấy
+            return AuthResponse.builder().message("User details not found").build();
+        }
+        
+        return AuthResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .displayName(user.getDisplayName())
+                .avatarUrl(user.getAvatarUrl())
+                .message("Success")
+                .build();
     }
 
     @GetMapping("/test")

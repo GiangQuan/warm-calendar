@@ -8,9 +8,29 @@ export interface User {
     authProvider: 'local' | 'google';
 }
 
+interface AuthResponse {
+    id?: number;
+    email?: string;
+    displayName?: string;
+    avatarUrl?: string;
+    message: string;
+}
+
 interface LoginResponse {
     user: User;
     message: string;
+}
+
+export interface EventDto {
+    id?: number;
+    title: string;
+    date: string; // YYYY-MM-DD
+    time?: string;
+    color: string;
+    recurrence: string;
+    endDate?: string;
+    meetingLink?: string;
+    userId?: number;
 }
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
@@ -21,45 +41,70 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
     return response.json();
 };
 
+const fetchWithCreds = (input: RequestInfo | URL, init?: RequestInit) => 
+    fetch(input, { ...init, credentials: 'include' });
+
+// Convert AuthResponse to LoginResponse format
+const wrapAuthResponse = (res: AuthResponse, authProvider: 'local' | 'google'): LoginResponse => {
+    if (!res.id || !res.email) {
+        throw new Error(res.message || 'Login failed');
+    }
+    return {
+        user: {
+            id: res.id,
+            email: res.email,
+            displayName: res.displayName,
+            avatarUrl: res.avatarUrl,
+            authProvider,
+        },
+        message: res.message,
+    };
+};
+
 export const api = {
-    register: (data: { email: string; password: string; displayName?: string }) =>
-        fetch(`${API_URL}/auth/register`, {
+    register: async (data: { email: string; password: string; displayName?: string }) => {
+        const res = await fetchWithCreds(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
-        }).then(res => handleResponse<LoginResponse>(res)),
+        }).then(r => handleResponse<AuthResponse>(r));
+        return wrapAuthResponse(res, 'local');
+    },
 
-    login: (data: { email: string; password: string }) =>
-        fetch(`${API_URL}/auth/login`, {
+    login: async (data: { email: string; password: string }) => {
+        const res = await fetchWithCreds(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
-        }).then(res => handleResponse<LoginResponse>(res)),
+        }).then(r => handleResponse<AuthResponse>(r));
+        return wrapAuthResponse(res, 'local');
+    },
 
-    googleLogin: (credential: string) =>
-        fetch(`${API_URL}/auth/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential }),
-        }).then(res => handleResponse<LoginResponse>(res)),
+    // Google OAuth - redirect to backend OAuth flow
+    getGoogleOAuthUrl: () => `${API_URL.replace('/api', '')}/oauth2/authorization/google`,
+
+    getCurrentUser: () =>
+        fetchWithCreds(`${API_URL}/auth/me`).then(res => handleResponse<AuthResponse>(res))
+            .then(res => wrapAuthResponse(res, 'google')),
 
     getEvents: (userId: number) =>
-        fetch(`${API_URL}/events?userId=${userId}`).then(res => handleResponse(res)),
+        fetchWithCreds(`${API_URL}/events?userId=${userId}`).then(res => handleResponse<EventDto[]>(res)),
 
-    createEvent: (event: any) =>
-        fetch(`${API_URL}/events`, {
+    createEvent: (event: Partial<EventDto>) =>
+        fetchWithCreds(`${API_URL}/events`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(event),
-        }).then(res => handleResponse(res)),
+        }).then(res => handleResponse<EventDto>(res)),
 
-    updateEvent: (id: number, event: any) =>
-        fetch(`${API_URL}/events/${id}`, {
+    updateEvent: (id: number, event: Partial<EventDto>) =>
+        fetchWithCreds(`${API_URL}/events/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(event),
-        }).then(res => handleResponse(res)),
+        }).then(res => handleResponse<EventDto>(res)),
 
     deleteEvent: (id: number) =>
-        fetch(`${API_URL}/events/${id}`, { method: 'DELETE' }),
+        fetchWithCreds(`${API_URL}/events/${id}`, { method: 'DELETE' }),
 };
+

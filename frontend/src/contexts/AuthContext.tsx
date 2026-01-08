@@ -9,6 +9,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: { displayName?: string; avatarUrl?: string }) => Promise<{ error: Error | null }>;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,16 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
       }
-    } else {
-      // MOCK USER - Bỏ qua đăng nhập để test Events API
-      // TODO: Xóa mock user này khi Auth API của Trang xong
-      setUser({
-        id: 1,
-        email: 'test@example.com',
-        displayName: 'Test User',
-        authProvider: 'local'
-      });
     }
+    // Mock user đã được tắt - user phải login để vào Calendar
     setLoading(false);
   }, []);
 
@@ -68,8 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    // TODO: Integrate with Google OAuth when backend is ready
-    return { error: new Error('Google login not yet implemented') };
+    // Redirect to backend Google OAuth flow
+    window.location.href = api.getGoogleOAuthUrl();
+    return { error: null };
   }, []);
 
   const signOut = useCallback(async () => {
@@ -91,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, updateProfile, setUser }}>
       {children}
     </AuthContext.Provider>
   );
