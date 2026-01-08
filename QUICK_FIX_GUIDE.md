@@ -15,6 +15,12 @@ This guide shows you exactly how to fix the critical issues in the backend-auth 
 - Remove the broken manual getters that return empty strings
 - Add validation annotations
 
+**⚠️ WARNING - Before (INSECURE - DO NOT USE):**
+```java
+// This is the OLD, VULNERABLE code that was in the original file
+if (user == null || !user.getPassword().equals(request.getPassword())) {
+```
+
 ---
 
 ### Fix 2: Update RegisterRequest.java
@@ -65,11 +71,16 @@ This guide shows you exactly how to fix the critical issues in the backend-auth 
 - ✅ **CRITICAL:** Use `passwordEncoder.matches()` instead of plain text comparison
 - Add `@Autowired PasswordEncoder passwordEncoder`
 - Implement the `register()` method with password hashing
-- Add `googleLogin()` method stub
+- Add `googleLogin()` method stub (full implementation requires additional setup)
 - Change Vietnamese messages to English
 - Add basic error handling
 
-**Before (INSECURE):**
+**Note:** For Google login to work fully, you'll also need to add this method to UserRepository:
+```java
+Optional<User> findByGoogleId(String googleId);
+```
+
+**⚠️ WARNING - Before (INSECURE - DO NOT USE):**
 ```java
 if (user == null || !user.getPassword().equals(request.getPassword())) {
 ```

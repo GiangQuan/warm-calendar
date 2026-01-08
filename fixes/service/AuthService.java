@@ -88,27 +88,48 @@ public class AuthService {
     /**
      * TODO: Implement Google login with token verification
      * 
+     * Required dependencies (already in pom.xml):
+     * - com.google.api-client:google-api-client:2.2.0
+     * 
+     * Required configuration (in application.properties):
+     * - spring.security.oauth2.client.registration.google.client-id
+     * 
      * Steps needed:
      * 1. Verify Google credential token using Google API client
      * 2. Extract user information from verified token
      * 3. Find existing user by googleId or create new user
      * 4. Return user information
+     * 
+     * Note: You'll need to add findByGoogleId() method to UserRepository
      */
     public AuthResponse googleLogin(GoogleLoginRequest request) {
-        // Placeholder implementation
+        // Placeholder implementation - replace with full implementation below
         return AuthResponse.builder()
                 .message("Google login not yet fully implemented")
                 .build();
         
-        /* Full implementation would look like this:
+        /* Full implementation example (requires additional imports and setup):
         
+        // Add these imports at the top of the file:
+        // import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+        // import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+        // import com.google.api.client.http.javanet.NetHttpTransport;
+        // import com.google.api.client.json.gson.GsonFactory;
+        // import org.springframework.beans.factory.annotation.Value;
+        // import java.util.Collections;
+        
+        // Add this field to the class:
+        // @Value("${spring.security.oauth2.client.registration.google.client-id}")
+        // private String googleClientId;
+        
+        // Then use this implementation:
         try {
-            // Verify Google token
+            // Create token verifier
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(), 
                 new GsonFactory()
             )
-            .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
+            .setAudience(Collections.singletonList(googleClientId))
             .build();
             
             GoogleIdToken idToken = verifier.verify(request.getCredential());
