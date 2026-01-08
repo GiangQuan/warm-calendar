@@ -61,14 +61,14 @@
       <br><sub>Traditional login with email and password</sub>
     </td>
     <td align="center" width="25%">
-      <img src="https://img.icons8.com/fluency/48/color-palette.png" alt="Color Coding"/>
-      <br><strong>🎨 Color Coding</strong>
-      <br><sub>Organize events with customizable colors</sub>
+      <img src="https://img.icons8.com/fluency/48/user-male-circle.png" alt="Avatar Upload"/>
+      <br><strong>🖼️ Profile Settings</strong>
+      <br><sub>Update display name & upload avatars from your PC</sub>
     </td>
     <td align="center" width="25%">
       <img src="https://img.icons8.com/fluency/48/database.png" alt="Cloud Sync"/>
       <br><strong>☁️ Cloud Sync</strong>
-      <br><sub>Your events are safely stored in the cloud</sub>
+      <br><sub>Your events are safely stored in MySQL</sub>
     </td>
   </tr>
 </table>
@@ -89,33 +89,32 @@
       <ul>
         <li>React 18</li>
         <li>TypeScript</li>
-        <li>Vite</li>
         <li>TailwindCSS</li>
         <li>shadcn/ui</li>
+        <li>Lucide Icons</li>
       </ul>
     </td>
     <td>
       <ul>
-        <li>Spring Boot 4.x</li>
+        <li>Spring Boot 3.x</li>
         <li>Java 17</li>
         <li>Spring Data JPA</li>
-        <li>Maven</li>
-        <li>Lombok</li>
+        <li>Lombok + Slf4j</li>
       </ul>
     </td>
     <td>
       <ul>
         <li>MySQL 8.x</li>
-        <li>Remote hosted</li>
-        <li>JPA/Hibernate</li>
+        <li>Local Uploads</li>
+        <li>Hibernate</li>
       </ul>
     </td>
     <td>
       <ul>
         <li>Spring Security</li>
-        <li>JWT Tokens</li>
+        <li>Session Management</li>
         <li>Google OAuth 2.0</li>
-        <li>BCrypt</li>
+        <li>BCrypt Hashing</li>
       </ul>
     </td>
   </tr>
@@ -137,7 +136,7 @@
 │                    │  api.ts  │                                 │
 │                    └────┬─────┘                                 │
 └─────────────────────────┼───────────────────────────────────────┘
-                          │ HTTP/REST
+                          │ HTTP/REST (Credentials: include)
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    ⚙️ Backend (Spring Boot)                     │
@@ -147,16 +146,18 @@
 │  │  │  AuthController   │  │   │  │   EventController     │  │ │
 │  │  │        ↓          │  │   │  │         ↓             │  │ │
 │  │  │   AuthService     │  │   │  │    EventService       │  │ │
-│  │  │        ↓          │  │   │  │         ↓             │  │ │
-│  │  │  UserRepository   │  │   │  │   EventRepository     │  │ │
 │  │  └───────────────────┘  │   │  └───────────────────────┘  │ │
-│  └─────────────────────────┘   └─────────────────────────────┘ │
+│  └─────────────────────────┘   └──────────────┬──────────────┘ │
+│                │                              │                │
+│                ▼                              ▼                │
+│        ┌───────────────┐              ┌────────────────┐       │
+│        │ User Repos    │              │ Event Repos    │       │
+│        └───────────────┘              └────────────────┘       │
 └─────────────────────────────────┬───────────────────────────────┘
                                   │ JPA/Hibernate
                                   ▼
                         ┌───────────────────┐
                         │   🗃️ MySQL 8.x    │
-                        │   Remote Server   │
                         └───────────────────┘
 ```
 
@@ -174,8 +175,9 @@ erDiagram
         VARCHAR avatar_url
         VARCHAR google_id UK
         VARCHAR auth_provider
+        DATETIME created_at
     }
-    
+
     EVENTS {
         BIGINT id PK
         VARCHAR title
@@ -187,7 +189,7 @@ erDiagram
         VARCHAR meeting_link
         BIGINT user_id FK
     }
-    
+
     USERS ||--o{ EVENTS : "has many"
 ```
 
@@ -197,9 +199,9 @@ erDiagram
 
 ### Prerequisites
 
-- **Java 17+** → Check: `java -version`
-- **Node.js 18+** → Check: `node -v`
-- **Maven** → Included via wrapper
+- **Java 17+**
+- **Node.js 18+**
+- **MySQL 8.x**
 
 ### 1️⃣ Clone the Repository
 
@@ -208,21 +210,26 @@ git clone https://github.com/GiangQuan/warm-calendar.git
 cd warm-calendar
 ```
 
-### 2️⃣ Run the Backend
+### 2️⃣ Database Setup
+
+Create a database named `admin_calendar` in your MySQL server. Update `application.properties` with your credentials:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/admin_calendar
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+```
+
+### 3️⃣ Run the Backend
 
 ```powershell
 cd backend/backend
-
-# Windows
 .\mvnw.cmd spring-boot:run
-
-# Mac/Linux
-./mvnw spring-boot:run
 ```
 
 🌐 Backend runs at: **http://localhost:8080**
 
-### 3️⃣ Run the Frontend
+### 4️⃣ Run the Frontend
 
 ```powershell
 cd frontend
@@ -236,22 +243,24 @@ npm run dev
 
 ## 📡 API Reference
 
-### 🔐 Authentication
+### 🔐 Auth & Profile
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `POST` | `/api/auth/register` | Register new account |
-| `POST` | `/api/auth/login` | Login with email/password |
-| `POST` | `/api/auth/google` | Login with Google |
+| Method | Endpoint             | Description                |
+| :----: | -------------------- | -------------------------- |
+| `POST` | `/api/auth/register` | Register new account       |
+| `POST` | `/api/auth/login`    | Login with email/password  |
+| `GET`  | `/api/auth/me`       | Get current logged-in user |
+| `PUT`  | `/api/auth/update`   | Update name & avatar URL   |
+| `POST` | `/api/upload/avatar` | Upload image from computer |
 
 ### 📅 Events
 
-| Method | Endpoint | Description |
-|:------:|----------|-------------|
-| `GET` | `/api/events?userId={id}` | Get user's events |
-| `POST` | `/api/events` | Create new event |
-| `PUT` | `/api/events/{id}` | Update event |
-| `DELETE` | `/api/events/{id}` | Delete event |
+|  Method  | Endpoint                  | Description       |
+| :------: | ------------------------- | ----------------- |
+|  `GET`   | `/api/events?userId={id}` | Get user's events |
+|  `POST`  | `/api/events`             | Create new event  |
+|  `PUT`   | `/api/events/{id}`        | Update event      |
+| `DELETE` | `/api/events/{id}`        | Delete event      |
 
 ---
 
@@ -329,6 +338,7 @@ java -version
 # Set JAVA_HOME (Windows)
 setx JAVA_HOME "C:\Program Files\Java\jdk-17"
 ```
+
 </details>
 
 <details>
@@ -340,6 +350,7 @@ Find and kill the process using port 8080:
 netstat -ano | findstr :8080
 taskkill /PID <PID_NUMBER> /F
 ```
+
 </details>
 
 <details>
