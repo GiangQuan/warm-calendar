@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.backend.dto.RegisterRequest;
+import com.example.backend.dto.UpdateProfileRequest;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AuthService {
 
     @Autowired
@@ -29,12 +32,12 @@ public class AuthService {
         // 2. Kiểm tra nếu không thấy user hoặc sai mật khẩu
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return AuthResponse.builder()
-                    .message("Sai email hoặc mật khẩu!")
+                    .message("Invalid email or password")
                     .build();
         }
 
         // 3. Đăng nhập thành công, trả về thông tin user
-        return mapToResponse(user, "Đăng nhập thành công!");
+        return mapToResponse(user, "Login successful");
     }
 
     // Hàm phụ để đóng gói dữ liệu trả về (Bạn đã viết ở task trước)
@@ -49,27 +52,57 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-    // 1. Kiểm tra email đã tồn tại chưa
-    if (userRepository.existsByEmail(request.getEmail())) {
-        return AuthResponse.builder()
-                .message("Email đã được sử dụng!")
-                .build();
+        log.info("Attempting to register user with email: {}", request.getEmail());
+        
+        // 1. Kiểm tra email đã tồn tại chưa
+        if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Registration failed: Email {} already exists", request.getEmail());
+            return AuthResponse.builder()
+                    .message("Email already registered")
+                    .build();
+        }
+
+        try {
+            // 2. Hash password trước khi lưu
+            String hashedPassword = passwordEncoder.encode(request.getPassword());
+
+            // 3. Tạo user mới
+            User newUser = User.builder()
+                    .email(request.getEmail())
+                    .password(hashedPassword)
+                    .displayName(request.getDisplayName())
+                    .authProvider("local")
+                    .build();
+
+            // 4. Lưu vào DB
+            User savedUser = userRepository.save(newUser);
+            log.info("User registered successfully with ID: {}", savedUser.getId());
+
+            return mapToResponse(savedUser, "Signup successful");
+        } catch (Exception e) {
+            log.error("Error during registration for email {}: {}", request.getEmail(), e.getMessage());
+            return AuthResponse.builder()
+                    .message("Error during registration: " + e.getMessage())
+                    .build();
+        }
     }
 
-    // 2. Hash password trước khi lưu
-    String hashedPassword = passwordEncoder.encode(request.getPassword());  // 👈 QUAN TRỌNG
+    public AuthResponse updateProfile(String email, UpdateProfileRequest request) {
+        log.info("Updating profile for user: {}", email);
+        
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // 3. Tạo user mới
-    User newUser = User.builder()
-            .email(request.getEmail())
-            .password(hashedPassword)  // Lưu password đã hash
-            .displayName(request.getDisplayName())
-            .authProvider("local")
-            .build();
+        if (request.getDisplayName() != null) {
+            user.setDisplayName(request.getDisplayName());
+        }
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
 
-    // 4. Lưu vào DB
-    userRepository.save(newUser);
+        User updatedUser = userRepository.save(user);
+        log.info("Profile updated successfully for User ID: {}", updatedUser.getId());
 
-    return mapToResponse(newUser, "Đăng ký thành công!");
-}
+        return mapToResponse(updatedUser, "Profile updated successfully");
+    }
 }

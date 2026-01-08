@@ -106,5 +106,23 @@ export const api = {
 
     deleteEvent: (id: number) =>
         fetchWithCreds(`${API_URL}/events/${id}`, { method: 'DELETE' }),
+
+    updateProfile: async (data: { displayName?: string; avatarUrl?: string }) => {
+        const res = await fetchWithCreds(`${API_URL}/auth/update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        }).then(r => handleResponse<AuthResponse>(r));
+        return wrapAuthResponse(res, 'local');
+    },
+
+    uploadAvatar: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return fetchWithCreds(`${API_URL}/upload/avatar`, {
+            method: 'POST',
+            body: formData,
+        }).then(res => handleResponse<{ url: string }>(res));
+    },
 };
 

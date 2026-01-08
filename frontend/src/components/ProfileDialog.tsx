@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 interface ProfileDialogProps {
     open: boolean;
@@ -20,9 +21,10 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
-    const { user, updateProfile } = useAuth();
+    const { user, updateProfile, uploadAvatar } = useAuth();
     const [displayName, setDisplayName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -54,9 +56,28 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         }
     };
 
-    const handleAvatarPreview = () => {
-        // Trigger preview update when URL changes
-        // The Avatar component handles broken URLs gracefully
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Check file size (e.g., max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('File size too large (max 5MB)');
+            return;
+        }
+
+        setIsUploading(true);
+        setError(null);
+
+        const { url, error: uploadError } = await uploadAvatar(file);
+        
+        setIsUploading(false);
+        
+        if (uploadError) {
+            setError(uploadError.message);
+        } else if (url) {
+            setAvatarUrl(url);
+        }
     };
 
     return (
@@ -73,16 +94,36 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     {/* Avatar Preview Section */}
                     <div className="flex flex-col items-center gap-4">
                         <div className="relative group">
-                            <Avatar
-                                src={avatarUrl || undefined}
-                                alt={displayName || user?.email || 'User'}
-                                fallback={displayName || user?.displayName || user?.email}
-                                size="lg"
-                                className="h-24 w-24 text-2xl"
+                            <input
+                                type="file"
+                                id="avatar-upload"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                disabled={isUploading}
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Camera className="h-6 w-6 text-white" />
-                            </div>
+                            <Label 
+                                htmlFor="avatar-upload" 
+                                className={cn(
+                                    "relative block group cursor-pointer rounded-full overflow-hidden transition-all",
+                                    isUploading && "opacity-50 pointer-events-none"
+                                )}
+                            >
+                                <Avatar
+                                    src={avatarUrl || undefined}
+                                    alt={displayName || user?.email || 'User'}
+                                    fallback={displayName || user?.displayName || user?.email}
+                                    size="lg"
+                                    className="h-24 w-24 text-2xl border-2 border-border group-hover:border-primary transition-colors"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {isUploading ? (
+                                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                                    ) : (
+                                        <Camera className="h-6 w-6 text-white" />
+                                    )}
+                                </div>
+                            </Label>
                         </div>
                         <p className="text-sm text-muted-foreground">
                             {user?.email}
@@ -111,7 +152,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                 value={avatarUrl}
                                 onChange={(e) => {
                                     setAvatarUrl(e.target.value);
-                                    handleAvatarPreview();
                                 }}
                                 className="bg-background"
                             />

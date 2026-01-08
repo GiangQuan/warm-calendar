@@ -11,8 +11,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -38,12 +43,20 @@ public class EventService {
 
     // Helper: Chuyển DTO sang Entity để lưu vào Database
     private Event convertToEntity(EventDto dto){
-        return Event.builder()
+        Event.EventBuilder builder = Event.builder()
                 .title(dto.getTitle())
                 .date(dto.getDate())
-                .time(dto.getTime())
-                .color(dto.getColor())
-                .recurrence(dto.getRecurrence())
+                .time(dto.getTime());
+        
+        // Chỉ set nếu có giá trị, nếu không Builder.Default trong Entity sẽ tự hoạt động
+        if (dto.getColor() != null && !dto.getColor().isEmpty()) {
+            builder.color(dto.getColor());
+        }
+        if (dto.getRecurrence() != null && !dto.getRecurrence().isEmpty()) {
+            builder.recurrence(dto.getRecurrence());
+        }
+        
+        return builder
                 .endDate(dto.getEndDate())
                 .meetingLink(dto.getMeetingLink())
                 .build();
@@ -60,7 +73,10 @@ public class EventService {
         Event event = convertToEntity(dto);
         event.setUser(user);
 
-        return convertToDto(eventRepository.save(event));
+        Event saved = eventRepository.save(event);
+        log.info("✅ Event '{}' saved successfully for User ID: {}. New Event ID: {}", 
+                saved.getTitle(), user.getId(), saved.getId());
+        return convertToDto(saved);
     }
 
     public EventDto updateEvent(Long id, EventDto dto) {

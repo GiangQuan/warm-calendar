@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name ="event")
+@Table(name ="events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,9 +27,11 @@ public class Event {
 
     private String time;
 
+    @Builder.Default
     @Column(nullable = false)
     private String color = "primary";
 
+    @Builder.Default
     @Column(nullable = false)
     private String recurrence = "none";
 

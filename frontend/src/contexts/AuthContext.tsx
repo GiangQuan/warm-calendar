@@ -9,6 +9,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: { displayName?: string; avatarUrl?: string }) => Promise<{ error: Error | null }>;
+  uploadAvatar: (file: File) => Promise<{ url: string | null; error: Error | null }>;
   setUser: (user: User | null) => void;
 }
 
@@ -75,17 +76,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!user) {
         return { error: new Error('No user logged in') };
       }
-      // Update user locally (will be synced to localStorage via useEffect)
-      // TODO: Call API to update profile on backend when ready
-      setUser(prev => prev ? { ...prev, ...data } : null);
+      const response = await api.updateProfile(data);
+      setUser(response.user);
       return { error: null };
     } catch (error) {
       return { error: error as Error };
     }
   }, [user]);
 
+  const uploadAvatar = useCallback(async (file: File) => {
+    try {
+      const { url } = await api.uploadAvatar(file);
+      return { url, error: null };
+    } catch (error) {
+      return { url: null, error: error as Error };
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, updateProfile, setUser }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, updateProfile, uploadAvatar, setUser }}>
       {children}
     </AuthContext.Provider>
   );
