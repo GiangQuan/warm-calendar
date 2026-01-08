@@ -1,23 +1,9 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
-<<<<<<< HEAD
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
-
-@Entity
-@Table(name= "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
-public class User {
-=======
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -25,18 +11,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User { // KHÔNG ĐƯỢC CÓ CHỮ 'FINAL' Ở ĐÂY
+public class User {
 
->>>>>>> backend-auth
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-<<<<<<< HEAD
-    @Column(nullable = false, unique = true)
-=======
     @Column(unique = true, nullable = false)
->>>>>>> backend-auth
     private String email;
 
     private String password;
@@ -50,15 +31,6 @@ public class User { // KHÔNG ĐƯỢC CÓ CHỮ 'FINAL' Ở ĐÂY
     @Column(name = "google_id", unique = true)
     private String googleId;
 
-<<<<<<< HEAD
-    @Column(name = "auth_provider")
-    private String authProvider;
-
-    // Thiết lập quan hệ ngược lại: 1 User có nhiều Events
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Event> events;
-}
-=======
     @Builder.Default
     @Column(name = "auth_provider")
     private String authProvider = "local";
@@ -68,6 +40,10 @@ public class User { // KHÔNG ĐƯỢC CÓ CHỮ 'FINAL' Ở ĐÂY
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Quan hệ: 1 User có nhiều Events
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Event> events;
 
     @PrePersist
     protected void onCreate() {
@@ -80,4 +56,3 @@ public class User { // KHÔNG ĐƯỢC CÓ CHỮ 'FINAL' Ở ĐÂY
         updatedAt = LocalDateTime.now();
     }
 }
->>>>>>> backend-auth
