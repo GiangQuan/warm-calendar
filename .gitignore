@@ -29,3 +29,4 @@ target/
 node_modules/
 backend/backend/.env
 backend/backend/src/main/resources/application.yml
+backend/backend/src/main/resources/application-local.properties
