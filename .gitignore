@@ -28,3 +28,4 @@ replay_pid*
 target/
 node_modules/
 backend/backend/.env
+backend/backend/src/main/resources/application.yml
