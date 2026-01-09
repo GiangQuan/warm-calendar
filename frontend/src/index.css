@@ -52,11 +52,13 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   /* Responsive base font size - scales all rem-based values */
   html {
     font-size: 17px; /* Base: ~106% of default 16px */
+    overflow-x: hidden;
   }
 
   @media (min-width: 640px) {
@@ -78,14 +80,42 @@
   }
 
   html,
-  body,
+  body {
+    @apply m-0 p-0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   #root {
-    @apply h-full w-full;
+    min-height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   body {
-    @apply bg-background text-foreground m-0 p-0 font-sans;
+    @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 }

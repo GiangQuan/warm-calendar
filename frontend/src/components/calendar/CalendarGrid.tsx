@@ -131,10 +131,10 @@ export function CalendarGrid({
                   <div className="flex flex-col items-center flex-shrink-0">
                     <span
                       className={cn(
-                        'inline-flex items-center justify-center text-sm sm:text-base font-medium transition-all rounded-full',
+                        'inline-flex items-center justify-center text-xs sm:text-sm font-medium transition-all rounded-full',
                         isDayToday 
-                          ? 'h-8 w-8 sm:h-10 sm:w-10 bg-blue-500 text-white shadow-md font-bold text-base sm:text-lg' 
-                          : 'h-6 w-6 sm:h-8 sm:w-8',
+                          ? 'h-6 w-6 sm:h-7 sm:w-7 bg-blue-500 text-white shadow-sm font-bold' 
+                          : 'h-5 w-5 sm:h-6 sm:w-6',
                         // Holiday-specific text colors
                         !isDayToday && isPublicHoliday && 'text-red-600 font-semibold',
                         !isDayToday && isLunarHoliday && 'text-amber-600 font-semibold',
