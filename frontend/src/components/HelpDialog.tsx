@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Mail, MessageCircle, BookOpen, ArrowLeft, Send, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, MessageCircle, BookOpen, ArrowLeft, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import {
     Dialog,
     DialogContent,
@@ -22,6 +23,12 @@ interface HelpDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
+
+// EmailJS Configuration - Read from environment variables
+// Create a .env file in frontend/ with these values from https://emailjs.com
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || '';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '';
 
 const SUPPORT_EMAIL = 'gquan97@gmail.com';
 
@@ -60,8 +67,11 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [senderEmail, setSenderEmail] = useState('');
+    const [senderName, setSenderName] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [usedMailto, setUsedMailto] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Reset form when dialog closes
     const handleOpenChange = (newOpen: boolean) => {
@@ -70,13 +80,17 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
             setSubject('');
             setMessage('');
             setSenderEmail('');
+            setSenderName('');
             setIsSuccess(false);
+            setUsedMailto(false);
+            setError(null);
         }
         onOpenChange(newOpen);
     };
 
     const handleEmailSupport = () => {
         setSenderEmail(user?.email || '');
+        setSenderName(user?.displayName || '');
         setViewMode('email-form');
     };
 
@@ -85,27 +99,62 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
         setSubject('');
         setMessage('');
         setIsSuccess(false);
+        setUsedMailto(false);
+        setError(null);
     };
 
     const handleSubmitEmail = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
-        // Create mailto link with form data
-        const mailtoSubject = encodeURIComponent(`[Warm Calendar Support] ${subject}`);
-        const mailtoBody = encodeURIComponent(
-            `From: ${senderEmail}\n\n${message}\n\n---\nSent from Warm Calendar Help & Support`
-        );
-        const mailtoLink = `mailto:${SUPPORT_EMAIL}?subject=${mailtoSubject}&body=${mailtoBody}`;
+        // Check if EmailJS is configured correctly
+        const isConfigured = EMAILJS_SERVICE_ID && 
+                           EMAILJS_TEMPLATE_ID && 
+                           EMAILJS_PUBLIC_KEY && 
+                           !EMAILJS_SERVICE_ID.includes('xxxxxxx');
 
-        // Simulate a brief delay for UX
-        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!isConfigured) {
+            // Fallback to mailto if EmailJS not configured
+            const mailtoSubject = encodeURIComponent(`[Warm Calendar Support] ${subject}`);
+            const mailtoBody = encodeURIComponent(
+                `From: ${senderName} <${senderEmail}>\n\n${message}\n\n---\nSent from Warm Calendar Help & Support`
+            );
+            window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${mailtoSubject}&body=${mailtoBody}`;
+            setIsSubmitting(false);
+            setUsedMailto(true);
+            setIsSuccess(true);
+            return;
+        }
 
-        // Open mail client
-        window.location.href = mailtoLink;
-
-        setIsSubmitting(false);
-        setIsSuccess(true);
+        try {
+            // Send email using EmailJS
+            const result = await emailjs.send(
+                EMAILJS_SERVICE_ID,
+                EMAILJS_TEMPLATE_ID,
+                {
+                    from_name: senderName,
+                    from_email: senderEmail,
+                    subject: subject,
+                    message: message,
+                    to_email: SUPPORT_EMAIL,
+                },
+                EMAILJS_PUBLIC_KEY
+            );
+            
+            if (result.status === 200) {
+                setUsedMailto(false);
+                setIsSuccess(true);
+            } else {
+                throw new Error(`EmailJS returned status ${result.status}`);
+            }
+        } catch (err: any) {
+            console.error('EmailJS error:', err);
+            const errorMsg = err?.text || err?.message || 'Unknown error';
+            setError(`Failed to send email: ${errorMsg}. Please check your .env keys and restart.`);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -241,18 +290,41 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
                                 <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                                     <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                                 </div>
-                                <div className="text-center space-y-2">
-                                    <h3 className="font-semibold text-lg">Email Client Opened!</h3>
-                                    <p className="text-sm text-muted-foreground max-w-xs">
-                                        Your default email app should now be open with your message. Simply click send to reach us.
+                                <div className="text-center space-y-2 px-4">
+                                    <h3 className="font-semibold text-lg">
+                                        {usedMailto ? 'Email Client Opened!' : 'Message Sent!'}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                                        {usedMailto 
+                                            ? 'Your default email app should now be open with your message. Simply click send to reach us.'
+                                            : 'Thank you for reaching out! Our support team has received your message and will get back to you soon.'}
                                     </p>
                                 </div>
-                                <Button onClick={handleBackToMain} variant="outline">
+                                <Button onClick={handleBackToMain} variant="outline" className="mt-4">
                                     Back to Help
                                 </Button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmitEmail} className="flex-1 space-y-4">
+                                {error && (
+                                    <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                        {error}
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="senderName">Your Name</Label>
+                                    <Input
+                                        id="senderName"
+                                        placeholder="John Doe"
+                                        value={senderName}
+                                        onChange={(e) => setSenderName(e.target.value)}
+                                        required
+                                        className="bg-background"
+                                    />
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="senderEmail">Your Email</Label>
                                     <Input
@@ -286,7 +358,7 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         required
-                                        rows={5}
+                                        rows={4}
                                         className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
                                     />
                                 </div>

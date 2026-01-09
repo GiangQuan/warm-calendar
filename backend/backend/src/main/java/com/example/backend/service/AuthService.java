@@ -29,14 +29,21 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);
 
-        // 2. Kiểm tra nếu không thấy user hoặc sai mật khẩu
+        // 2. Kiểm tra nếu là tài khoản Google (không có mật khẩu local)
+        if (user != null && user.getPassword() == null && "google".equals(user.getAuthProvider())) {
+            return AuthResponse.builder()
+                    .message("This email is registered via Google. Please use 'Sign in with Google'.")
+                    .build();
+        }
+
+        // 3. Kiểm tra nếu không thấy user hoặc sai mật khẩu
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return AuthResponse.builder()
                     .message("Invalid email or password")
                     .build();
         }
 
-        // 3. Đăng nhập thành công, trả về thông tin user
+        // 4. Đăng nhập thành công, trả về thông tin user
         return mapToResponse(user, "Login successful");
     }
 
@@ -55,10 +62,18 @@ public class AuthService {
         log.info("Attempting to register user with email: {}", request.getEmail());
         
         // 1. Kiểm tra email đã tồn tại chưa
-        if (userRepository.existsByEmail(request.getEmail())) {
+        User existingUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (existingUser != null) {
             log.warn("Registration failed: Email {} already exists", request.getEmail());
+            
+            if ("google".equals(existingUser.getAuthProvider())) {
+                return AuthResponse.builder()
+                        .message("This email is already registered via Google. Please sign in with Google.")
+                        .build();
+            }
+            
             return AuthResponse.builder()
-                    .message("Email already registered")
+                    .message("Email already registered. Please sign in.")
                     .build();
         }
 

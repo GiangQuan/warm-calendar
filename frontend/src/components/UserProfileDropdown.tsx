@@ -11,7 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ProfileDialog } from '@/components/ProfileDialog';
 import { HelpDialog } from '@/components/HelpDialog';
+import { SettingsDialog } from '@/components/SettingsDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface UserProfileDropdownProps {
     className?: string;
@@ -19,13 +21,10 @@ interface UserProfileDropdownProps {
 
 export function UserProfileDropdown({ className }: UserProfileDropdownProps) {
     const { user, signOut } = useAuth();
+    const { t } = useSettings();
     const [profileOpen, setProfileOpen] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
-
-    const handleSettings = () => {
-        // TODO: Open settings modal or navigate to settings page
-        console.log('Settings clicked');
-    };
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     return (
         <>
@@ -63,30 +62,32 @@ export function UserProfileDropdown({ className }: UserProfileDropdownProps) {
 
                     <DropdownMenuItem onClick={() => setProfileOpen(true)} className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Account</span>
+                        <span>{t('account')}</span>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={handleSettings} className="cursor-pointer">
+                    <DropdownMenuItem onClick={() => setSettingsOpen(true)} className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
+                        <span>{t('settings')}</span>
                     </DropdownMenuItem>
 
                     <DropdownMenuItem onClick={() => setHelpOpen(true)} className="cursor-pointer">
                         <HelpCircle className="mr-2 h-4 w-4" />
-                        <span>Help & Support</span>
+                        <span>{t('help')}</span>
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
                         <LogOut className="mr-2 h-4 w-4" />
-                        <span>Sign Out</span>
+                        <span>{t('sign_out')}</span>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
             <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
             <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+            <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
         </>
     );
 }
+

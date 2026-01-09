@@ -68,19 +68,11 @@ export default function Auth() {
       if (isSignUp) {
         const { error } = await signUp(email, password, displayName || undefined);
         if (error) {
-          if (error.message.includes('already registered')) {
-            toast({
-              variant: 'destructive',
-              title: 'Account exists',
-              description: 'This email is already registered. Please sign in instead.',
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Sign up failed',
-              description: error.message,
-            });
-          }
+          toast({
+            variant: 'destructive',
+            title: 'Sign up failed',
+            description: error.message,
+          });
         } else {
           toast({
             title: 'Account created!',
@@ -90,19 +82,13 @@ export default function Auth() {
       } else {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login')) {
-            toast({
-              variant: 'destructive',
-              title: 'Invalid credentials',
-              description: 'Please check your email and password.',
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Sign in failed',
-              description: error.message,
-            });
-          }
+          // If it's a specific message about Google, use it; otherwise generic
+          const isGoogleError = error.message.includes('registered via Google');
+          toast({
+            variant: 'destructive',
+            title: isGoogleError ? 'Google Account' : 'Sign in failed',
+            description: error.message,
+          });
         }
       }
     } finally {

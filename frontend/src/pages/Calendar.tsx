@@ -18,6 +18,7 @@ import { GeminiChat } from '@/components/calendar/GeminiChat';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { cn } from '@/lib/utils';
 
 const Calendar = () => {
@@ -36,7 +37,7 @@ const Calendar = () => {
   const [pendingDragDate, setPendingDragDate] = useState<Date | null>(null);
   const [pendingDragTime, setPendingDragTime] = useState<string | undefined>(undefined);
   const [mobileAIOpen, setMobileAIOpen] = useState(false);
-  const [showLunar, setShowLunar] = useState(true); // Lunar calendar toggle
+  const { settings, updateSettings, t } = useSettings();
   const { events, addEvent, updateEvent, removeEvent, getEventsForDate } = useCalendarEvents();
   
   // Enable browser notifications
@@ -189,14 +190,14 @@ const Calendar = () => {
               />
               <div className="flex items-center gap-2 sm:gap-3">
                 <Button
-                  variant={showLunar ? 'default' : 'outline'}
+                  variant={settings.showLunar ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setShowLunar(!showLunar)}
+                  onClick={() => updateSettings({ showLunar: !settings.showLunar })}
                   className="gap-1.5 h-8"
-                  title={showLunar ? 'Ẩn Âm lịch' : 'Hiện Âm lịch'}
+                  title={t('show_lunar')}
                 >
                   <Moon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Âm lịch</span>
+                  <span className="hidden sm:inline">{t('lunar')}</span>
                 </Button>
                 <ViewToggle view={view} onViewChange={setView} />
                 <div className="lg:hidden">
@@ -220,7 +221,7 @@ const Calendar = () => {
                 onSelectDate={setSelectedDate}
                 onAddEventClick={handleAddEventClick}
                 onEventClick={handleEditEvent}
-                showLunar={showLunar}
+                showLunar={settings.showLunar}
               />
             ) : (
               <WeekGrid
