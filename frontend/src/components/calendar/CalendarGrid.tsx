@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { CalendarEvent } from '@/types/calendar';
 import { DraggableEvent } from './DraggableEvent';
 import { DroppableCell } from './DroppableCell';
+import { getHoliday, getLunarDisplay } from '@/utils/vietnamese-calendar';
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -22,6 +23,7 @@ interface CalendarGridProps {
   onSelectDate: (date: Date) => void;
   onAddEventClick: (date: Date) => void;
   onEventClick?: (event: CalendarEvent) => void;
+  showLunar?: boolean;
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -33,6 +35,7 @@ export function CalendarGrid({
   onSelectDate,
   onAddEventClick,
   onEventClick,
+  showLunar = false,
 }: CalendarGridProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -96,6 +99,11 @@ export function CalendarGrid({
           const isSelected = isSameDay(day, selectedDate);
           const isCurrentMonth = isSameMonth(day, currentDate);
           const isDayToday = isToday(day);
+          const holiday = getHoliday(day);
+          const isHoliday = holiday !== null;
+          const isPublicHoliday = holiday?.type === 'public';
+          const isLunarHoliday = holiday?.type === 'lunar';
+          const isObservance = holiday?.type === 'observance';
 
           return (
             <DroppableCell
@@ -106,29 +114,71 @@ export function CalendarGrid({
                 'group relative min-h-[80px] sm:min-h-[110px] md:min-h-[120px] lg:min-h-[130px] p-1 sm:p-2 text-left border-b border-r border-gray-200 transition-all duration-200 cursor-pointer',
                 index % 7 === 0 && 'border-l-0',
                 !isCurrentMonth && 'bg-[#F7F8F9] text-muted-foreground',
-                isCurrentMonth && !isDayToday && 'hover:bg-accent/40',
+                // Today
                 isDayToday && 'bg-blue-50 ring-2 ring-inset ring-blue-400/50',
-                isSelected && !isDayToday && 'bg-accent ring-1 ring-inset ring-primary/20'
+                // Holiday backgrounds (when not today)
+                !isDayToday && isPublicHoliday && 'bg-red-50 border-red-200',
+                !isDayToday && isLunarHoliday && 'bg-amber-50 border-amber-200',
+                !isDayToday && isObservance && 'bg-pink-50 border-pink-200',
+                // Hover for normal days
+                isCurrentMonth && !isDayToday && !isHoliday && 'hover:bg-accent/40',
+                // Selected state
+                isSelected && !isDayToday && !isHoliday && 'bg-accent ring-1 ring-inset ring-primary/20'
               )}
             >
-              <div className="flex items-start   justify-between">
-                <span
-                  className={cn(
-                    'inline-flex items-center justify-center text-xs sm:text-sm font-medium transition-all rounded-full',
-                    isDayToday 
-                      ? 'h-7 w-7 sm:h-9 sm:w-9 bg-blue-500 text-white shadow-md font-bold' 
-                      : 'h-5 w-5 sm:h-7 sm:w-7',
-                    !isCurrentMonth && 'text-muted-foreground/60'
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <div className="flex flex-col items-center flex-shrink-0">
+                    <span
+                      className={cn(
+                        'inline-flex items-center justify-center text-sm sm:text-base font-medium transition-all rounded-full',
+                        isDayToday 
+                          ? 'h-8 w-8 sm:h-10 sm:w-10 bg-blue-500 text-white shadow-md font-bold text-base sm:text-lg' 
+                          : 'h-6 w-6 sm:h-8 sm:w-8',
+                        // Holiday-specific text colors
+                        !isDayToday && isPublicHoliday && 'text-red-600 font-semibold',
+                        !isDayToday && isLunarHoliday && 'text-amber-600 font-semibold',
+                        !isDayToday && isObservance && 'text-pink-600 font-semibold',
+                        !isCurrentMonth && 'text-muted-foreground/60'
+                      )}
+                    >
+                      {format(day, 'd')}
+                    </span>
+                    {/* Lunar date display */}
+                    {showLunar && (() => {
+                      const lunar = getLunarDisplay(day);
+                      return (
+                        <span 
+                          className={cn(
+                            'text-[9px] sm:text-[10px] leading-tight',
+                            lunar.isSpecial ? 'text-amber-600 font-semibold' : 'text-muted-foreground'
+                          )}
+                        >
+                          {lunar.text}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  {isHoliday && (
+                    <span 
+                      className={cn(
+                        'hidden sm:inline-block text-[11px] md:text-xs font-medium truncate',
+                        holiday.type === 'public' && 'text-red-600',
+                        holiday.type === 'lunar' && 'text-amber-600',
+                        holiday.type === 'observance' && 'text-pink-500'
+                      )}
+                      title={holiday.name}
+                    >
+                      {holiday.name}
+                    </span>
                   )}
-                >
-                  {format(day, 'd')}
-                </span>
+                </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onAddEventClick(day);
                   }}
-                  className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-all duration-200 h-6 w-6 items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow"
+                  className="hidden sm:flex opacity-0 group-hover:opacity-100 transition-all duration-200 h-6 w-6 items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow flex-shrink-0"
                   aria-label="Add event"
                 >
                   <Plus className="h-3.5 w-3.5" />

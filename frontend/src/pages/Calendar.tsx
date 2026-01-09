@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addMonths, subMonths, addWeeks, subWeeks, parseISO } from 'date-fns';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { Plus, MessageCircle, X } from 'lucide-react';
+import { Plus, MessageCircle, X, Moon } from 'lucide-react';
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { WeekGrid } from '@/components/calendar/WeekGrid';
@@ -36,6 +36,7 @@ const Calendar = () => {
   const [pendingDragDate, setPendingDragDate] = useState<Date | null>(null);
   const [pendingDragTime, setPendingDragTime] = useState<string | undefined>(undefined);
   const [mobileAIOpen, setMobileAIOpen] = useState(false);
+  const [showLunar, setShowLunar] = useState(true); // Lunar calendar toggle
   const { events, addEvent, updateEvent, removeEvent, getEventsForDate } = useCalendarEvents();
   
   // Enable browser notifications
@@ -186,7 +187,17 @@ const Calendar = () => {
                 onToday={handleToday}
                 onDateChange={setCurrentDate}
               />
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  variant={showLunar ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowLunar(!showLunar)}
+                  className="gap-1.5 h-8"
+                  title={showLunar ? 'Ẩn Âm lịch' : 'Hiện Âm lịch'}
+                >
+                  <Moon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Âm lịch</span>
+                </Button>
                 <ViewToggle view={view} onViewChange={setView} />
                 <div className="lg:hidden">
                   <UserProfileDropdown />
@@ -209,6 +220,7 @@ const Calendar = () => {
                 onSelectDate={setSelectedDate}
                 onAddEventClick={handleAddEventClick}
                 onEventClick={handleEditEvent}
+                showLunar={showLunar}
               />
             ) : (
               <WeekGrid

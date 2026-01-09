@@ -54,6 +54,29 @@
     @apply border-border;
   }
 
+  /* Responsive base font size - scales all rem-based values */
+  html {
+    font-size: 17px; /* Base: ~106% of default 16px */
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 17.5px; /* sm: ~109% */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: 18px; /* lg: ~112.5% */
+    }
+  }
+
+  @media (min-width: 1280px) {
+    html {
+      font-size: 18.5px; /* xl: ~115.6% */
+    }
+  }
+
   html,
   body,
   #root {
@@ -62,5 +85,7 @@
 
   body {
     @apply bg-background text-foreground m-0 p-0 font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
