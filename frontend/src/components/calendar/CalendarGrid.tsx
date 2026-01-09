@@ -106,15 +106,18 @@ export function CalendarGrid({
                 'group relative min-h-[80px] sm:min-h-[110px] md:min-h-[120px] lg:min-h-[130px] p-1 sm:p-2 text-left border-b border-r border-gray-200 transition-all duration-200 cursor-pointer',
                 index % 7 === 0 && 'border-l-0',
                 !isCurrentMonth && 'bg-[#F7F8F9] text-muted-foreground',
-                isCurrentMonth && 'hover:bg-accent/40',
-                isSelected && 'bg-accent ring-1 ring-inset ring-primary/20'
+                isCurrentMonth && !isDayToday && 'hover:bg-accent/40',
+                isDayToday && 'bg-blue-50 ring-2 ring-inset ring-blue-400/50',
+                isSelected && !isDayToday && 'bg-accent ring-1 ring-inset ring-primary/20'
               )}
             >
               <div className="flex items-start   justify-between">
                 <span
                   className={cn(
-                    'inline-flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center text-xs sm:text-sm font-medium transition-all',
-                    isDayToday && 'bg-primary text-primary-foreground shadow-sm',
+                    'inline-flex items-center justify-center text-xs sm:text-sm font-medium transition-all rounded-full',
+                    isDayToday 
+                      ? 'h-7 w-7 sm:h-9 sm:w-9 bg-blue-500 text-white shadow-md font-bold' 
+                      : 'h-5 w-5 sm:h-7 sm:w-7',
                     !isCurrentMonth && 'text-muted-foreground/60'
                   )}
                 >

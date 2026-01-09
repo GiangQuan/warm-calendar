@@ -1,0 +1,37 @@
+diff --git a/frontend/src/components/calendar/CalendarHeader.tsx b/frontend/src/components/calendar/CalendarHeader.tsx
+index be05cb84..ea5ba3ac 100644
+--- a/frontend/src/components/calendar/CalendarHeader.tsx
++++ b/frontend/src/components/calendar/CalendarHeader.tsx
+@@ -1,7 +1,7 @@
+ import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+ import { Button } from '@/components/ui/button';
+ import { format, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
+-import { ViewToggle, CalendarView } from './ViewToggle';
++import { CalendarView } from './ViewToggle';
+ import {
+   Popover,
+   PopoverContent,
+@@ -19,7 +19,6 @@ import { useState } from 'react';
+ interface CalendarHeaderProps {
+   currentDate: Date;
+   view: CalendarView;
+-  onViewChange: (view: CalendarView) => void;
+   onPrevious: () => void;
+   onNext: () => void;
+   onToday: () => void;
+@@ -37,7 +36,6 @@ const YEARS = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+ export function CalendarHeader({
+   currentDate,
+   view,
+-  onViewChange,
+   onPrevious,
+   onNext,
+   onToday,
+@@ -153,7 +151,6 @@ export function CalendarHeader({
+         >
+           Today
+         </Button>
+-        <ViewToggle view={view} onViewChange={onViewChange} />
+       </div>
+     </div>
+   );
