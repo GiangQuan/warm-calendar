@@ -38,6 +38,8 @@ public class EventService {
                 .recurrence(event.getRecurrence())
                 .endDate(event.getEndDate())
                 .meetingLink(event.getMeetingLink())
+                .reminderEnabled(event.getReminderEnabled())
+                .reminderMinutes(event.getReminderMinutes())
                 .build();
     }
 
@@ -46,7 +48,9 @@ public class EventService {
         Event.EventBuilder builder = Event.builder()
                 .title(dto.getTitle())
                 .date(dto.getDate())
-                .time(dto.getTime());
+                .time(dto.getTime())
+                .reminderEnabled(dto.getReminderEnabled() != null ? dto.getReminderEnabled() : true)
+                .reminderMinutes(dto.getReminderMinutes() != null ? dto.getReminderMinutes() : 15);
         
         // Chỉ set nếu có giá trị, nếu không Builder.Default trong Entity sẽ tự hoạt động
         if (dto.getColor() != null && !dto.getColor().isEmpty()) {
@@ -90,6 +94,8 @@ public class EventService {
         event.setRecurrence(dto.getRecurrence());
         event.setEndDate(dto.getEndDate());
         event.setMeetingLink(dto.getMeetingLink());
+        event.setReminderEnabled(dto.getReminderEnabled());
+event.setReminderMinutes(dto.getReminderMinutes());
 
         return convertToDto(eventRepository.save(event));
     }

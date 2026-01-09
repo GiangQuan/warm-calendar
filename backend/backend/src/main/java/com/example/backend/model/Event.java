@@ -41,6 +41,14 @@ public class Event {
     @Column(name = "meeting_link")
     private String meetingLink;
 
+    @Builder.Default
+@Column(name = "reminder_enabled")
+private Boolean reminderEnabled = true;
+
+@Builder.Default
+@Column(name = "reminder_minutes")
+private Integer reminderMinutes = 15;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Repeat, CalendarIcon, Link } from 'lucide-react';
-import { format, addMonths } from 'date-fns';
+import { Plus, Repeat, CalendarIcon, Link, Bell, BellOff } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,10 +26,11 @@ import {
 } from '@/components/ui/select';
 import { EventColor, RecurrenceType, recurrenceLabels } from '@/types/calendar';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 
 interface AddEventFormProps {
   selectedDate: Date;
-  onAddEvent: (event: { title: string; date: Date; time?: string; color: EventColor; recurrence: RecurrenceType; endDate?: Date; meetingLink?: string }) => void;
+  onAddEvent: (event: { title: string; date: Date; time?: string; color: EventColor; recurrence: RecurrenceType; endDate?: Date; meetingLink?: string; reminderEnabled?: boolean; reminderMinutes?: number }) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -58,6 +59,8 @@ export function AddEventForm({ selectedDate, onAddEvent, open: controlledOpen, o
   const [recurrence, setRecurrence] = useState<RecurrenceType>('none');
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [meetingLink, setMeetingLink] = useState('');
+  const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [reminderMinutes, setReminderMinutes] = useState(15);
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
@@ -71,6 +74,8 @@ export function AddEventForm({ selectedDate, onAddEvent, open: controlledOpen, o
       setRecurrence('none');
       setEndDate(undefined);
       setMeetingLink('');
+      setReminderEnabled(true);
+      setReminderMinutes(15);
     }
   }, [open]);
 
@@ -86,6 +91,8 @@ export function AddEventForm({ selectedDate, onAddEvent, open: controlledOpen, o
       recurrence,
       endDate: recurrence !== 'none' ? endDate : undefined,
       meetingLink: meetingLink.trim() || undefined,
+      reminderEnabled,
+      reminderMinutes,
     });
 
     setOpen(false);
@@ -223,6 +230,45 @@ export function AddEventForm({ selectedDate, onAddEvent, open: controlledOpen, o
               </Popover>
             </div>
           )}
+
+          {/* Reminder Settings */}
+          <div className="space-y-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {reminderEnabled ? (
+                  <Bell className="h-4 w-4 text-primary" />
+                ) : (
+                  <BellOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="reminder-toggle">Reminder</Label>
+              </div>
+              <Switch
+                id="reminder-toggle"
+                checked={reminderEnabled}
+                onCheckedChange={setReminderEnabled}
+              />
+            </div>
+            
+            {reminderEnabled && (
+              <Select
+                value={reminderMinutes.toString()}
+                onValueChange={(val) => setReminderMinutes(parseInt(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Remind me before..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 minutes before</SelectItem>
+                  <SelectItem value="10">10 minutes before</SelectItem>
+                  <SelectItem value="15">15 minutes before</SelectItem>
+                  <SelectItem value="30">30 minutes before</SelectItem>
+                  <SelectItem value="60">1 hour before</SelectItem>
+                  <SelectItem value="1440">1 day before</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
           <Button type="submit" className="w-full">
             Create Event
           </Button>

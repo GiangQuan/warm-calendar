@@ -86,7 +86,10 @@ export function WeekGrid({
   return (
     <div className="bg-card border border-border overflow-hidden shadow-sm animate-fade-in">
       {/* Header with days */}
-      <div className="grid grid-cols-[40px_repeat(7,1fr)] sm:grid-cols-[60px_repeat(7,1fr)] border-b border-border bg-muted/30">
+      <div 
+        className="grid grid-cols-[40px_repeat(7,1fr)] sm:grid-cols-[60px_repeat(7,1fr)] border-b border-border"
+        style={{ backgroundColor: '#dae0e7' }}
+      >
         <div className="py-2 sm:py-3 border-r border-border" />
         {days.map((day) => (
           <div

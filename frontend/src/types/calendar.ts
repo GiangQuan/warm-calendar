@@ -9,6 +9,8 @@ export interface CalendarEvent {
   recurrence: RecurrenceType;
   endDate?: Date;
   meetingLink?: string;
+  reminderEnabled?: boolean;
+  reminderMinutes?: number;
 }
 
 export type EventColor = 'primary' | 'secondary' | 'accent' | 'destructive' | 'red' | 'orange' | 'amber' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink' | 'teal';

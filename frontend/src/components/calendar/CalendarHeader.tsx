@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, startOfWeek, endOfWeek, setMonth, setYear } from 'date-fns';
-import { ViewToggle, CalendarView } from './ViewToggle';
+import { CalendarView } from './ViewToggle';
 import {
   Popover,
   PopoverContent,
@@ -19,7 +19,6 @@ import { useState } from 'react';
 interface CalendarHeaderProps {
   currentDate: Date;
   view: CalendarView;
-  onViewChange: (view: CalendarView) => void;
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -37,7 +36,6 @@ const YEARS = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 export function CalendarHeader({
   currentDate,
   view,
-  onViewChange,
   onPrevious,
   onNext,
   onToday,
@@ -72,13 +70,13 @@ export function CalendarHeader({
   };
 
   return (
-    <div className="flex items-center gap-3 sm:gap-4 animate-fade-in">
-      <div className="flex items-center bg-muted/30 rounded-lg p-1 gap-0.5">
+    <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-4 animate-fade-in">
+      <div className="flex items-center bg-muted/30 rounded-lg p-0.5 sm:p-1 gap-0.5">
         <Button
           variant="ghost"
           size="icon"
           onClick={onPrevious}
-          className="h-8 w-8 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
+          className="h-7 w-7 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
@@ -86,7 +84,7 @@ export function CalendarHeader({
           variant="ghost"
           size="icon"
           onClick={onNext}
-          className="h-8 w-8 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
+          className="h-7 w-7 sm:h-9 sm:w-9 rounded-md transition-all duration-200 hover:bg-accent hover:scale-105 active:scale-95"
         >
           <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
@@ -96,10 +94,10 @@ export function CalendarHeader({
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight font-serif text-foreground hover:bg-accent/50 px-2 py-1 h-auto gap-1 transition-all duration-200"
+            className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold tracking-tight font-serif text-foreground hover:bg-accent/50 px-1.5 sm:px-2 py-1 h-auto gap-0.5 sm:gap-1 transition-all duration-200"
           >
             {getTitle()}
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-4 bg-popover border border-border shadow-lg z-50" align="start">
@@ -144,16 +142,15 @@ export function CalendarHeader({
         </PopoverContent>
       </Popover>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1 sm:gap-3">
         <Button
           variant="outline"
           size="sm"
           onClick={onToday}
-          className="h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-border/60 bg-card hover:bg-accent hover:border-accent transition-all duration-200 hover:shadow-md active:scale-95"
+          className="h-7 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-border/60 bg-card hover:bg-accent hover:border-accent transition-all duration-200 hover:shadow-md active:scale-95"
         >
           Today
         </Button>
-        <ViewToggle view={view} onViewChange={onViewChange} />
       </div>
     </div>
   );

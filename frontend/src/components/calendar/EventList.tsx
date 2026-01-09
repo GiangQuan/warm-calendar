@@ -22,15 +22,15 @@ interface EventListProps {
 export function EventList({ date, events, onRemoveEvent, onEditEvent, className }: EventListProps) {
   return (
     <div className={cn("bg-card border border-border shadow-sm animate-slide-up flex flex-col overflow-hidden", className)}>
-      <div className="p-5 border-b border-border bg-[#dae0e7]">
-        <h2 className="text-lg font-semibold font-serif">
+      <div className="p-3 sm:p-5 border-b border-border bg-[#dae0e7]">
+        <h2 className="text-base sm:text-lg font-semibold font-serif">
           {format(date, 'EEEE')}
         </h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
           {format(date, 'MMMM d, yyyy')}
         </p>
       </div>
-      <div className="p-4 flex-1 overflow-y-auto min-h-0">
+      <div className="p-3 sm:p-4 flex-1 overflow-y-auto min-h-0">
         {events.length === 0 ? (
           <div className="text-center py-8">
             <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />

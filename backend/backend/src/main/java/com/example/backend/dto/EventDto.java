@@ -21,4 +21,6 @@ public class EventDto {
     private LocalDate endDate;
     private String meetingLink;
     private Long userId;
+    private Boolean reminderEnabled;
+    private Integer reminderMinutes;
 }

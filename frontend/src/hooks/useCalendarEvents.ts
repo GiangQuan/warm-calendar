@@ -71,12 +71,24 @@ export function useCalendarEvents() {
 
   const updateEvent = useCallback(
     async (id: string, updates: Partial<Omit<CalendarEvent, 'id'>>) => {
+      const existingEvent = events.find(e => e.id === id);
+      if (!existingEvent) return;
+
+      // 1. Lưu lại trạng thái cũ để rollback nếu lỗi
+      const originalEvents = [...events];
+
+      // 2. Optimistic Update: Cập nhật state ngay lập tức
+      const optimisticEvent = { ...existingEvent, ...updates };
+      setEvents(prev => prev.map(e => e.id === id ? optimisticEvent : e));
+
       try {
+        const { id: _, ...eventContent } = { ...existingEvent, ...updates };
+
         const payload = {
-          ...updates,
+          ...eventContent,
           userId: user?.id,
-          date: updates.date ? format(updates.date, 'yyyy-MM-dd') : undefined,
-          endDate: updates.endDate ? format(updates.endDate, 'yyyy-MM-dd') : undefined,
+          date: format(updates.date || existingEvent.date, 'yyyy-MM-dd'),
+          endDate: (updates.endDate || existingEvent.endDate) ? format(updates.endDate || existingEvent.endDate!, 'yyyy-MM-dd') : undefined,
         };
         const updatedEvent = await api.updateEvent(Number(id), payload);
         
@@ -89,16 +101,19 @@ export function useCalendarEvents() {
           recurrence: updatedEvent.recurrence as any,
         } as CalendarEvent;
 
+        // Đồng bộ lại với dữ liệu thật từ Server
         setEvents((prev) =>
           prev.map((event) =>
             event.id === id ? formattedUpdatedEvent : event
           )
         );
       } catch (error) {
-        console.error("Failed to update event:", error);
+        console.error("Failed to update event, rolling back:", error);
+        // Rollback nếu API lỗi
+        setEvents(originalEvents);
       }
     },
-    [user]
+    [user, events]
   );
 
   const removeEvent = useCallback(async (id: string) => {

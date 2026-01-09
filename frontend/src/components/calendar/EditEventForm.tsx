@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Repeat, CalendarIcon, Link } from 'lucide-react';
+import { Repeat, CalendarIcon, Link, Bell, BellOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { CalendarEvent, EventColor, RecurrenceType, recurrenceLabels } from '@/types/calendar';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 
 interface EditEventFormProps {
   event: CalendarEvent | null;
@@ -64,6 +65,8 @@ export function EditEventForm({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [meetingLink, setMeetingLink] = useState('');
+  const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [reminderMinutes, setReminderMinutes] = useState(15);
 
   useEffect(() => {
     if (event) {
@@ -74,6 +77,8 @@ export function EditEventForm({
       setEndDate(event.endDate ? new Date(event.endDate) : undefined);
       setStartDate(new Date(event.date));
       setMeetingLink(event.meetingLink || '');
+      setReminderEnabled(event.reminderEnabled ?? true);
+      setReminderMinutes(event.reminderMinutes ?? 15);
     }
   }, [event]);
 
@@ -89,6 +94,8 @@ export function EditEventForm({
       recurrence,
       endDate: recurrence !== 'none' ? endDate : undefined,
       meetingLink: meetingLink.trim() || undefined,
+      reminderEnabled,
+      reminderMinutes,
     });
 
     onOpenChange(false);
@@ -244,6 +251,45 @@ export function EditEventForm({
               </Popover>
             </div>
           )}
+
+          {/* Reminder Settings */}
+          <div className="space-y-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {reminderEnabled ? (
+                  <Bell className="h-4 w-4 text-primary" />
+                ) : (
+                  <BellOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Label htmlFor="edit-reminder-toggle">Reminder</Label>
+              </div>
+              <Switch
+                id="edit-reminder-toggle"
+                checked={reminderEnabled}
+                onCheckedChange={setReminderEnabled}
+              />
+            </div>
+            
+            {reminderEnabled && (
+              <Select
+                value={reminderMinutes.toString()}
+                onValueChange={(val) => setReminderMinutes(parseInt(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Remind me before..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 minutes before</SelectItem>
+                  <SelectItem value="10">10 minutes before</SelectItem>
+                  <SelectItem value="15">15 minutes before</SelectItem>
+                  <SelectItem value="30">30 minutes before</SelectItem>
+                  <SelectItem value="60">1 hour before</SelectItem>
+                  <SelectItem value="1440">1 day before</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
           <div className="flex gap-2">
             <Button type="submit" className="flex-1">
               Save Changes
